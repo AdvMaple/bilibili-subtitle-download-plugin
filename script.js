@@ -8,6 +8,14 @@ document
   .addEventListener("click", ButtonClickAction, false);
 
 function ButtonClickAction(zEvent) {
+  // setTimeout(()=>{},300)
+  try {
+    var div_content =
+      document.getElementsByClassName("video-info__title")[0].innerText;
+  } catch (e) {
+    console.log(e);
+  }
+
   var url = window.location.href;
   var id = url.match(/\d+/g);
   var series_id = id[0];
@@ -31,18 +39,29 @@ function ButtonClickAction(zEvent) {
 
         fetch(`https://api.biliintl.com/intl/gateway/m/subtitle?ep_id=${ep_id}`)
           .then((r) => r.json())
-          .then((d) => {
-            const { data } = d;
-            len = data.subtitles.length;
-            for (let i = 0; i < len; i++) {
-              if (data.subtitles[i].key == "vi") {
-                // console.log(data.subtitles[i].url);
-                ep_sub_url = data.subtitles[i].url;
+          .then(
+            (d) => {
+              const { data } = d;
+              len = data.subtitles.length;
+              for (let i = 0; i < len; i++) {
+                if (data.subtitles[i].key == "vi") {
+                  // console.log(data.subtitles[i].url);
+                  ep_sub_url = data.subtitles[i].url;
+                  fetch(ep_sub_url)
+                    .then((r) => r.json())
+                    .then((d) => {
+                      var blob = new Blob([JSON.stringify(d)], {
+                        type: "application/json",
+                      });
+                      var url_from_blob = URL.createObjectURL(blob);
 
-                var a = document.createElement("a");
-                a.textContent = title + " ";
-                a.href = ep_sub_url;
-                document.getElementById("myContainer").appendChild(a);
+                      var a = document.createElement("a");
+                      a.download = `${div_content} ep ${title}.json`;
+                      a.textContent = title + " ";
+                      a.href = url_from_blob;
+                      document.getElementById("myContainer").appendChild(a);
+                    });
+                }
               }
             }
             // console.log(data.subtitles);
@@ -51,7 +70,7 @@ function ButtonClickAction(zEvent) {
             // a.textContent = title + " ";
             // a.href = "http://google.com";
             // document.getElementById("myContainer").appendChild(a);
-          });
+          );
       });
     });
 
