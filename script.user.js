@@ -1,3 +1,15 @@
+// ==UserScript==
+// @name         New Userscript
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  try to take over the world!
+// @author       AdvMaple
+// @match        *://www.biliintl.com/*
+// @icon         https://www.google.com/s2/favicons?domain=biliintl.com
+// @grant       GM_addStyle
+
+// ==/UserScript==
+
 var zNode = document.createElement("div");
 zNode.innerHTML = '<button id="myButton" type="button"> Click me </button>';
 zNode.setAttribute("id", "myContainer");
