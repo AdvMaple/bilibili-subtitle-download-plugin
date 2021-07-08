@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         biliintl download
-// @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  try to take over the world!
+// @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        *://www.biliintl.com/*
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
+// @updateURL https://github.com/AdvMaple/biliintl_subtitle_download_plugin/raw/main/download.user.js
 // @grant       GM_addStyle
 
 // ==/UserScript==
