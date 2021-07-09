@@ -115,6 +115,7 @@
       bottom:                 6rem;
       left: 1rem;
       margin: 3px;
+      z-index: 9999;
   }
   #myButton {
     cursor:                 pointer;
