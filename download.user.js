@@ -123,9 +123,6 @@
   }
 
   #myButton:hover {
-    cursor:                 pointer;
-    padding: 3px;
-    margin-bottom: 3px;
     background-color: #4078cb;
     color: white;
   }
@@ -140,8 +137,6 @@
     padding: 3px;
   }
   #mySortBtn:hover {
-    cursor:                 pointer;
-    padding: 3px;
     background-color: #4078cb;
     color: white;
   }
