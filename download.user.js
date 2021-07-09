@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         biliintl download
-// @version      0.1
+// @version      0.2
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        *://www.biliintl.com/*
@@ -11,10 +11,6 @@
 
 // ==/UserScript==
 (function () {
-  var sort_by_name = function (a, b) {
-    return a.innerHTML.toLowerCase().localeCompare(b.innerHTML.toLowerCase());
-  };
-
   var zNode = document.createElement("div");
   zNode.innerHTML = '<button id="myButton" type="button"> Click me </button>';
   zNode.setAttribute("id", "myContainer");
