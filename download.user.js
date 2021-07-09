@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         biliintl download
-// @version      0.2
+// @version      0.2.1
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        *://www.biliintl.com/*
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
-// @updateURL https://github.com/AdvMaple/biliintl_subtitle_download_plugin/raw/main/download.user.js
-// @grant       GM_addStyle
-// @require http://code.jquery.com/jquery-3.6.0.min.js
+// @updateURL    https://github.com/AdvMaple/biliintl_subtitle_download_plugin/raw/main/download.user.js
+// @grant        GM_addStyle
+// @require      http://code.jquery.com/jquery-3.6.0.min.js
 
 // ==/UserScript==
 (function () {
@@ -44,7 +44,7 @@
       .then((r) => r.json())
       .then((data) => (x = data))
       .then(() => {
-        epList = x.data.episodes;
+        var epList = x.data.episodes;
 
         epList.map((x) => {
           const { title, ep_id } = x;
@@ -57,10 +57,10 @@
             .then((d) => {
               const { data } = d;
               // console.log(data);
-              len = data.subtitles.length;
+              var len = data.subtitles.length;
               for (let i = 0; i < len; i++) {
                 if (data.subtitles[i].key == "vi") {
-                  ep_sub_url = data.subtitles[i].url;
+                  var ep_sub_url = data.subtitles[i].url;
                   fetch(ep_sub_url)
                     .then((r) => r.json())
                     .then((d) => {
