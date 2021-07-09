@@ -82,9 +82,10 @@
       })
       .then(() => {
         var zNode = document.createElement("div");
+        zNode.setAttribute("id", "BtnContainer");
         zNode.innerHTML =
-          '<button id="mySortBtn" type="button"> sort </button>';
-        zNode.setAttribute("id", document.getElementById("myContainer"));
+          '<button id="mySortBtn" type="button"> Sort </button>';
+
         document.getElementById("myContainer").appendChild(zNode);
 
         document
@@ -112,9 +113,22 @@
   #myContainer {
       position:               fixed; 
       bottom:                 6rem;
+      left: 1rem;
+      margin: 3px;
+
+  }
+  #BtnContainer{
+    margin-top: 3px;
+    margin-bottom: 6px;
   }
   #myButton {
       cursor:                 pointer;
+      padding: 3px;
+      margin-bottom: 3px;
+  }
+  #mySortBtn {
+    cursor:                 pointer;
+    padding: 3px;
   }
   #myContainer a {
       color:                  red;
