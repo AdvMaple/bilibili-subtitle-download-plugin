@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         biliintl download
-// @version      0.2.1
+// @version      0.2.2
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        *://www.biliintl.com/*
