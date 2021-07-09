@@ -115,24 +115,44 @@
       bottom:                 6rem;
       left: 1rem;
       margin: 3px;
-
   }
+  #myButton {
+    cursor:                 pointer;
+    padding: 3px;
+    margin-bottom: 3px;
+  }
+
+  #myButton:hover {
+    cursor:                 pointer;
+    padding: 3px;
+    margin-bottom: 3px;
+    background-color: #4078cb;
+    color: white;
+  }
+
   #BtnContainer{
     margin-top: 3px;
     margin-bottom: 6px;
   }
-  #myButton {
-      cursor:                 pointer;
-      padding: 3px;
-      margin-bottom: 3px;
-  }
+  
   #mySortBtn {
     cursor:                 pointer;
     padding: 3px;
   }
+  #mySortBtn:hover {
+    cursor:                 pointer;
+    padding: 3px;
+    background-color: #4078cb;
+    color: white;
+  }
+
   #myContainer a {
       color:                  red;
       background:             white;
   }
+  #myContainer a:hover {
+    color:                  #4078cb;
+    background:             white;
+}
 `);
 })();
