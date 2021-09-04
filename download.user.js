@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         biliintl download
-// @version      0.2.2
+// @version      0.3
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        *://www.biliintl.com/*
@@ -10,9 +10,6 @@
 // @require      http://code.jquery.com/jquery-3.6.0.min.js
 
 // ==/UserScript==
-
-// vid and audio api: https://api.biliintl.com/intl/gateway/web/playurl?ep_id=<episode_id>&device=wap&platform=web&qn=64&tf=0&type=0
-// sub api: https://api.biliintl.com/intl/gateway/web/playurl?ep_id=<episode_id>&s_locale=vi&device=wap&platform=web&qn=64&tf=0&type=0
 
 // Script start here
 (function () {
@@ -259,3 +256,6 @@
 }
 `);
 })();
+
+// vid and audio api: https://api.biliintl.com/intl/gateway/web/playurl?ep_id=<episode_id>&device=wap&platform=web&qn=64&tf=0&type=0
+// sub api: https://api.biliintl.com/intl/gateway/web/playurl?ep_id=<episode_id>&s_locale=vi&device=wap&platform=web&qn=64&tf=0&type=0
