@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         biliintl download
-// @version      0.3
+// @version      0.3.1
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        *://www.biliintl.com/*
@@ -18,9 +18,9 @@
 
   zNode.innerHTML = `
     <button id="subtitleDownload" type="button"> Download Sub </button>
-    <div class="linkContainer" id="jsonSubtitleList">Subtitle: </div>
-    <div class="linkContainer" id="videoList">Video: </div>
-    <div class="linkContainer" id="audioList">Audio: </div>
+    <div class="linkContainer" id="jsonSubtitleList">Subtitle:</div>
+    <div class="linkContainer" id="videoList">Video\&nbsp;\&nbsp;\&nbsp;:</div>
+    <div class="linkContainer" id="audioList">Audio\&nbsp;\&nbsp;\&nbsp;:</div>
     `;
 
   zNode.setAttribute("id", "downloadBiliintScript");
@@ -97,7 +97,7 @@
                       //Create <a> tag
                       var a = document.createElement("a");
                       a.download = `${div_content} ep ${title}.json`;
-                      a.textContent = " " + title;
+                      a.textContent = `${title} `;
                       a.href = URL.createObjectURL(blob);
                       document
                         .getElementById("jsonSubtitleList")
@@ -122,6 +122,7 @@
               const suggestQuality = d.quality;
               var maxVideoQuality = 0;
               var maxAudioQuality = 0;
+              //VIDEO LOOP
               for (let i = 0; i < d.video.length; i++) {
                 episode_url = d.video[i]["video_resource"].url;
                 if (episode_url !== "") {
@@ -130,7 +131,7 @@
 
                     var a = document.createElement("a");
                     // a.textContent = ` [${maxVideoQuality}]${title} `;
-                    a.textContent = ` ${title} `;
+                    a.textContent = `${title} `;
                     a.href = episode_url;
                     a.download = "episode_url";
                     a.type = "video/mp4";
@@ -139,6 +140,7 @@
                   }
                 }
               }
+              //AUDIO LOOP
               // console.log(title, d["audio_resource"]);
               for (let i = 0; i < d["audio_resource"].length; i++) {
                 audio_url = d["audio_resource"][i].url;
@@ -215,19 +217,20 @@
       left: 1rem;
       margin: 3px;
       z-index: 9999;
+      
   }
   .linkContainer{
     color: black;
     background: white;
     margin: 2px;
   }
-  #myButton {
+  #subtitleDownload {
     cursor:                 pointer;
     padding: 3px;
     margin-bottom: 3px;
   }
 
-  #myButton:hover {
+  #subtitleDownload:hover {
     background-color: #4078cb;
     color: white;
   }
