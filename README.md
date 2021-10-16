@@ -1,8 +1,9 @@
-# biliintl_subtitle_download_plugin
+# Biliintl Subtitle Download Script
 Use Tamper Monkey. Login for best video quality.
 
 Link to install script: https://github.com/AdvMaple/biliintl_subtitle_download_plugin/raw/main/download.user.js
 
+Not the best script, but usable.
 
 If there any problem, open an issue.
 
