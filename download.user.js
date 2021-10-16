@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         biliintl download
-// @version      0.3.1
+// @version      0.3.2
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        *://www.biliintl.com/*
@@ -10,6 +10,16 @@
 // @require      http://code.jquery.com/jquery-3.6.0.min.js
 
 // ==/UserScript==
+
+/*
+CHANGE SUB_LANGUAGE to:
+"en" for English
+"th" for Thai
+"zh-Hans" for Chinese
+"vn" for Vietnamese
+*/
+
+const SUB_LANGUAGE = "vi";
 
 // Script start here
 (function () {
@@ -85,7 +95,7 @@
               //Take data in response
               //Get number in subtitle files in data
               for (let i = 0; i < data.subtitles.length; i++) {
-                if (data.subtitles[i].key == "vi") {
+                if (data.subtitles[i].key == SUB_LANGUAGE) {
                   var ep_sub_url = data.subtitles[i].url;
                   fetch(ep_sub_url)
                     .then((r) => r.json())
@@ -260,5 +270,3 @@
 `);
 })();
 
-// vid and audio api: https://api.biliintl.com/intl/gateway/web/playurl?ep_id=<episode_id>&device=wap&platform=web&qn=64&tf=0&type=0
-// sub api: https://api.biliintl.com/intl/gateway/web/playurl?ep_id=<episode_id>&s_locale=vi&device=wap&platform=web&qn=64&tf=0&type=0
