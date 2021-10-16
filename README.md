@@ -9,6 +9,10 @@ Use Tamper Monkey. Login for best video quality.
 ## Note
 Not the best script, but usable.
 
+There are many "flavor" of biliint site, if they use the same api, this script will problably work.
+
+Change the SUB_LANGUAGE to your desired subtitle language.
+
 If there any problem, open an issue.
 
 ![image](https://user-images.githubusercontent.com/46006210/137569629-adc1a41a-5862-4bb6-b4cf-128e2518762b.png)
