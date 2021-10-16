@@ -16,7 +16,8 @@ CHANGE SUB_LANGUAGE to:
 "en" for English
 "th" for Thai
 "zh-Hans" for Chinese
-"vn" for Vietnamese
+"vi" for Vietnamese
+"id" for Bahasa Indonesia
 */
 
 const SUB_LANGUAGE = "vi";
