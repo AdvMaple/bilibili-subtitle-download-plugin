@@ -4,6 +4,8 @@ Use Tamper Monkey. Login for best video quality.
 ## How to install
   1. Install Tamper Monkey plugin for your browser.
   2. Use the install scipt link: https://github.com/AdvMaple/biliintl_subtitle_download_plugin/raw/main/download.user.js . Tamper Monkey will auto detect it and install it for you.
+
+
 ![bili (1)](https://user-images.githubusercontent.com/46006210/138017615-b0b49480-2615-42ac-9831-9346306577f8.gif)
 
 ## Note
