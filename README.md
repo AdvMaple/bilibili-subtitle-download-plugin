@@ -1,4 +1,4 @@
-# Biliintl Subtitle Download Script
+# Biliintl/Bilibili.tv Subtitle Download Script
 Use Tamper Monkey. Login for best video quality.
 
 ## How to install
