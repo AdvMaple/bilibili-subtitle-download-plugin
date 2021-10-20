@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.4.1
+// @version      0.4.2
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        www.bili*
