@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name         biliintl download
-// @version      0.3.2
+// @name         bili international download
+// @version      0.4.0
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        /www.bili*/
@@ -21,6 +21,7 @@ CHANGE SUB_LANGUAGE to:
 */
 
 const SUB_LANGUAGE = "vi";
+
 
 // Script start here
 (function () {
@@ -74,7 +75,7 @@ const SUB_LANGUAGE = "vi";
     //Get list of episode in series
     var x;
     fetch(
-      `https://api.biliintl.com/intl/gateway/web/view/ogv_collection?s_locale=vi&season_id=${series_id}`
+      `https://api.bilibili.tv/intl/gateway/web/view/ogv_collection?s_locale=vi&season_id=${series_id}`
     )
       .then((r) => r.json())
       .then((data) => (x = data))
@@ -89,7 +90,7 @@ const SUB_LANGUAGE = "vi";
 
           // Get list of subtitle in episode
           fetch(
-            `https://api.biliintl.com/intl/gateway/m/subtitle?ep_id=${ep_id}`
+            `https://api.bilibili.tv/intl/gateway/m/subtitle?ep_id=${ep_id}`
           )
             .then((r) => r.json())
             .then(({ data }) => {
@@ -122,7 +123,7 @@ const SUB_LANGUAGE = "vi";
 
           //Get list of video and audio in episode
           fetch(
-            `https://api.biliintl.com/intl/gateway/web/playurl?ep_id=${ep_id}&device=wap&platform=web&qn=64&tf=0&type=0`,
+            `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${ep_id}&device=wap&platform=web&qn=64&tf=0&type=0`,
             { credentials: "include" }
           )
             .then((r) => r.json())
