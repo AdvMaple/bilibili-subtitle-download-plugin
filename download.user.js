@@ -114,7 +114,7 @@ CHANGE SUB_LANGUAGE to:
     }
 
     for (let i = 0; i < title_list.length; i++) {
-      let text = title_list[i].innerText.match(/E\d+ -/g)[0].match(/\d+/g)[0];
+      let text = title_list[i].innerText.match(/^([\w\-]+)/)[0].match(/\d+/g)[0];
       ep_obj.title.push(text);
     }
     console.log(ep_obj.title);
