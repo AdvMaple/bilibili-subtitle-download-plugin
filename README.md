@@ -1,5 +1,6 @@
 # Biliintl/Bilibili.tv Subtitle Download Script
 Use Tamper Monkey. Login for best video quality.
+Enable Check Update for Tamper Monkey, I regularly fix any bug that happen.
 
 ## How to install
   1. Install Tamper Monkey plugin for your browser.
