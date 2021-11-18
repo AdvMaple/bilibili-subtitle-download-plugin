@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.2
+// @version      0.5.3
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        www.bili*
@@ -221,7 +221,10 @@ CHANGE SUB_LANGUAGE to:
 
   function ButtonSortClick(zEvent) {
     var sort_by_num = function (a, b) {
-      return a.innerText - b.innerText;
+      return (
+        Number(a.innerText.match(/\d+/g)[0]) -
+        Number(b.innerText.match(match(/\d+/g)[0]))
+      );
     };
 
     // var sort_by_num_with_extra_character = function (a, b) {
