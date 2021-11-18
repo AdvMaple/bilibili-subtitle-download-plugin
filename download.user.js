@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.0
+// @version      0.5.1
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        www.bili*
@@ -139,7 +139,7 @@ CHANGE SUB_LANGUAGE to:
                   });
                   //Create <a> tag
                   var a = document.createElement("a");
-                  a.download = `${div_content} ep ${ep_obj.title[index]}.json`;
+                  a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.json`;
                   a.textContent = `${ep_obj.title[index]} `;
                   // a.download = `sub.json`;
                   // a.textContent = `title`;
