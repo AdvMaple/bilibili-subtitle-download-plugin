@@ -1,3 +1,10 @@
+# 18/11/2021 UPDATE
+Bilibili just update their website, so old version will not be able to get download link.
+I have fixed these issue. Please update to the latest version.
+
+New feauture:
+Added Language Select.
+
 # Biliintl/Bilibili.tv Subtitle Download Script
 Use Tamper Monkey. Login for best video quality.
 Enable Check Update for Tamper Monkey, I regularly fix any bug that happen.
