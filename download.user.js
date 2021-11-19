@@ -15,10 +15,10 @@
 /*
 CHANGE SUB_LANGUAGE to:
 "en" for English
-"th" for Thai
-"zh-Hans" for Chinese
-"vi" for Vietnamese
-"id" for Bahasa Indonesia
+"th" สำหรับภาษาไทย
+"zh-Hans" 中國人
+"vi" cho người việt nam
+"id" untuk Bahasa Indonesia
 */
 
 // Script start here
@@ -37,33 +37,33 @@ CHANGE SUB_LANGUAGE to:
     return `
       <option value="vi" ${
         sub_language === "vi" ? "selected" : ""
-      }> Vietnam </option>
+      }> Tiếng Việt </option>
       <option value="id" ${
         sub_language === "id" ? "selected" : ""
-      }> Indo </option>
+      }> Bahasa Indonesia </option>
       <option value="en" ${
         sub_language === "en" ? "selected" : ""
       }> English </option>
       <option value="zh" ${
         sub_language === "zh" ? "selected" : ""
-      }> Hans </option>
+      }> 中文（简体） </option>
       <option value="th" ${
         sub_language === "th" ? "selected" : ""
-      }> Thai </option>`;
+      }> ภาษาไทย </option>`;
   }
 
   let zNode = document.createElement("div");
 
   zNode.innerHTML = `
-    <button id="subtitleDownload" type="button"> Download Sub </button>
+    <button id="subtitleDownload" type="button" style="border-radius:20px;padding:8px"> Download Sub </button>
 
     <select id="changeLanguage" class="subtitleSelect" name="lang" id="lang">
       ${createSelectOption()}
     </select>
 
-    <div class="linkContainer" id="jsonSubtitleList">Subtitle:</div>
-    <div class="linkContainer" id="videoList">Video\&nbsp;\&nbsp;\&nbsp;:</div>
-    <div class="linkContainer" id="audioList">Audio\&nbsp;\&nbsp;\&nbsp;:</div>
+    <div class="linkContainer" id="jsonSubtitleList" style="border-radius:20px;padding:4px;font-size:15px">Subtitle:\&nbsp;</div>
+    <div class="linkContainer" id="videoList" style="border-radius:20px;padding:4px;font-size:15px">Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
+    <div class="linkContainer" id="audioList" style="border-radius:20px;padding:4px;font-size:15px">Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
     `;
 
   zNode.setAttribute("id", "downloadBiliintScript");
@@ -211,7 +211,8 @@ CHANGE SUB_LANGUAGE to:
       sorted = 1;
       var zNode = document.createElement("div");
       zNode.setAttribute("id", "BtnContainer");
-      zNode.innerHTML = '<button id="mySortBtn" type="button"> Sort </button>';
+      zNode.innerHTML = '<button id="mySortBtn" type="button" style=""> Sort </button>';
+
       document.getElementById("downloadBiliintScript").appendChild(zNode);
       document
         .getElementById("mySortBtn")
@@ -263,57 +264,76 @@ CHANGE SUB_LANGUAGE to:
 
   // Style newly added button
   GM_addStyle(`
+
   #downloadBiliintScript {
       position:               fixed; 
       bottom:                 6rem;
       left: 1rem;
       margin: 3px;
       z-index: 9999;
+      opacity:0.97;
       
   }
   .linkContainer{
     color: black;
     background: white;
+    opacity:0.97;
     margin: 2px;
   }
   #subtitleDownload {
     cursor:                 pointer;
     padding: 3px;
     margin-bottom: 3px;
+    opacity:0.97;
+
+
   }
 
   #subtitleDownload:hover {
-    background-color: #4078cb;
+    background-color: #6b9f25;
     color: white;
+
   }
 
   #BtnContainer{
     margin-top: 3px;
     margin-bottom: 6px;
+    opacity:0.97;
   }
   
   #mySortBtn {
     cursor:                 pointer;
     padding: 3px;
+    border-radius:20px;
+    width:100%;
+    background-color:#23427f;
+    color:white;
+    opacity:0.99;
   }
   #mySortBtn:hover {
-    background-color: #4078cb;
-    color: white;
+    background-color: #38548b;
+    color: #d3d9e5;
+
   }
 
   #downloadBiliintScript a {
-      color:                  red;
+      color:                  #4c93ff;
       background:             white;
+      opacity:0.97;
   }
   #downloadBiliintScript a:hover {
     color:                  #4078cb;
     background:             white;
+    opacity:0.97;
   }
   .subtitleSelect {
+
     margin-top: 3px;
     margin-bottom: 6px;
-    padding: 3px;
-    background:             white;
+    border-radius:20px;
+    padding: 8px;
+    background:     white;
+    opacity:0.97;
   }
 `);
 })();
