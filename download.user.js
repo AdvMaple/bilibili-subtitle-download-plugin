@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.4
+// @version      0.5.5
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        www.bili*
@@ -55,15 +55,15 @@ CHANGE SUB_LANGUAGE to:
   let zNode = document.createElement("div");
 
   zNode.innerHTML = `
-    <button id="subtitleDownload" type="button" style="border-radius:20px;padding:8px"> Download Sub </button>
+    <button id="subtitleDownload" type="button"> Download Sub </button>
 
     <select id="changeLanguage" class="subtitleSelect" name="lang" id="lang">
       ${createSelectOption()}
     </select>
 
-    <div class="linkContainer" id="jsonSubtitleList" style="border-radius:20px;padding:4px;font-size:15px">Subtitle:\&nbsp;</div>
-    <div class="linkContainer" id="videoList" style="border-radius:20px;padding:4px;font-size:15px">Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
-    <div class="linkContainer" id="audioList" style="border-radius:20px;padding:4px;font-size:15px">Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
+    <div class="linkContainer" id="jsonSubtitleList">Subtitle:\&nbsp;</div>
+    <div class="linkContainer" id="videoList" >Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
+    <div class="linkContainer" id="audioList" >Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
     `;
 
   zNode.setAttribute("id", "downloadBiliintScript");
@@ -114,10 +114,14 @@ CHANGE SUB_LANGUAGE to:
     }
 
     for (let i = 0; i < title_list.length; i++) {
-      let text = title_list[i].innerText.match(/^([\w\-]+)/)[0];
-      ep_obj.title.push(text);
+      let text = title_list[i].innerText.match(/^([\w\-]+)/);
+      try {
+        ep_obj.title.push(text[0]);
+      } catch (error) {
+        ep_obj.title.push(i + 1);
+      }
     }
-    console.log(ep_obj.title);
+    // console.log(ep_obj.title);
 
     ep_obj.id.map((ep_id, index) => {
       // console.log(ep_id, ep_obj.title[index]);
@@ -140,7 +144,7 @@ CHANGE SUB_LANGUAGE to:
                   //Create <a> tag
                   var a = document.createElement("a");
                   a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.json`;
-                  a.textContent = `${ep_obj.title[index]} `;
+                  a.textContent = `${getEpTitle(ep_obj.title[index])} `;
                   // a.download = `sub.json`;
                   // a.textContent = `title`;
                   a.href = URL.createObjectURL(blob);
@@ -211,7 +215,8 @@ CHANGE SUB_LANGUAGE to:
       sorted = 1;
       var zNode = document.createElement("div");
       zNode.setAttribute("id", "BtnContainer");
-      zNode.innerHTML = '<button id="mySortBtn" type="button" style=""> Sort </button>';
+      zNode.innerHTML =
+        '<button id="mySortBtn" type="button" style=""> Sort </button>';
 
       document.getElementById("downloadBiliintScript").appendChild(zNode);
       document
@@ -222,7 +227,6 @@ CHANGE SUB_LANGUAGE to:
 
   function ButtonSortClick(zEvent) {
     var sort_by_num = function (a, b) {
-      console.log(a, b);
       return (
         Number(a.innerText.match(/\d+/g)[0]) -
         Number(b.innerText.match(/\d+/g)[0])
@@ -260,80 +264,91 @@ CHANGE SUB_LANGUAGE to:
     sub_language = e.target.value;
   }
 
-  console.log("From  AdvMaple");
+  function getEpTitle(title) {
+    console.log(title);
+    if (title === null) {
+      return "1";
+    }
+    return title;
+  }
+
+  console.log("From AdvMaple");
 
   // Style newly added button
   GM_addStyle(`
 
   #downloadBiliintScript {
-      position:               fixed; 
-      bottom:                 6rem;
+      position: fixed; 
+      bottom: 6rem;
       left: 1rem;
       margin: 3px;
       z-index: 9999;
-      opacity:0.97;
-      
+      opacity: 0.97;
   }
+
   .linkContainer{
     color: black;
     background: white;
-    opacity:0.97;
+    opacity: 0.97;
     margin: 2px;
+    border-radius: 20px;
+    padding: 4px;
+    font-size: 15px
   }
+
   #subtitleDownload {
-    cursor:                 pointer;
+    cursor: pointer;
     padding: 3px;
     margin-bottom: 3px;
     opacity:0.97;
-
-
+    border-radius: 20px;
+    padding: 8px;
   }
 
   #subtitleDownload:hover {
     background-color: #6b9f25;
     color: white;
-
   }
 
   #BtnContainer{
     margin-top: 3px;
     margin-bottom: 6px;
-    opacity:0.97;
+    opacity: 0.97;
   }
   
   #mySortBtn {
-    cursor:                 pointer;
+    cursor: pointer;
     padding: 3px;
     border-radius:20px;
-    width:100%;
-    background-color:#23427f;
-    color:white;
-    opacity:0.99;
+    width: 100%;
+    background-color: #23427f;
+    color: white;
+    opacity: 0.99;
   }
   #mySortBtn:hover {
     background-color: #38548b;
     color: #d3d9e5;
-
   }
 
   #downloadBiliintScript a {
-      color:                  #4c93ff;
-      background:             white;
-      opacity:0.97;
+      color: #4c93ff;
+      background: white;
+      opacity: 0.97;
   }
-  #downloadBiliintScript a:hover {
-    color:                  #4078cb;
-    background:             white;
-    opacity:0.97;
-  }
-  .subtitleSelect {
 
+  #downloadBiliintScript a:hover {
+    color: #4078cb;
+    background: white;
+    opacity: 0.97;
+  }
+
+  .subtitleSelect {
     margin-top: 3px;
     margin-bottom: 6px;
-    border-radius:20px;
+    border-radius: 20px;
     padding: 8px;
-    background:     white;
-    opacity:0.97;
+    background: white;
+    opacity: 0.97;
   }
 `);
 })();
