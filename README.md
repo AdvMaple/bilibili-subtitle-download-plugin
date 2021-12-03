@@ -2,6 +2,8 @@
 Bilibili just update their website, so old version will not be able to get download link.
 I have fixed these issue. Please update to the latest version.
 
+Current script issue: Only work in big screen size. If your UI have episode list on the right side of video player, the script will probably work.
+
 New feauture:
 Added Language Select.
 
