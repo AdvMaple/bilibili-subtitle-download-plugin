@@ -35,21 +35,29 @@ CHANGE SUB_LANGUAGE to:
 
   function createSelectOption() {
     return `
-      <option value="vi" ${
-        sub_language === "vi" ? "selected" : ""
+      <option value="vi" ${sub_language === "vi" ? "selected" : ""
       }> Tiếng Việt </option>
-      <option value="id" ${
-        sub_language === "id" ? "selected" : ""
+      <option value="id" ${sub_language === "id" ? "selected" : ""
       }> Bahasa Indonesia </option>
-      <option value="en" ${
-        sub_language === "en" ? "selected" : ""
+      <option value="en" ${sub_language === "en" ? "selected" : ""
       }> English </option>
-      <option value="zh" ${
-        sub_language === "zh" ? "selected" : ""
+      <option value="zh" ${sub_language === "zh" ? "selected" : ""
       }> 中文（简体） </option>
-      <option value="th" ${
-        sub_language === "th" ? "selected" : ""
+      <option value="th" ${sub_language === "th" ? "selected" : ""
       }> ภาษาไทย </option>`;
+  }
+
+  /**
+   * Convert second to time stamp
+   * @param {*} sec 
+   */
+  function secToTimer(sec) {
+    let o = new Date(0);
+    let p = new Date(sec * 1000);
+    return new Date(p.getTime() - o.getTime())
+      .toISOString()
+      .split("T")[1]
+      .split("Z")[0];
   }
 
   let zNode = document.createElement("div");
@@ -137,13 +145,31 @@ CHANGE SUB_LANGUAGE to:
               fetch(ep_sub_url)
                 .then((r) => r.json())
                 .then((d) => {
+
+                  let text = "";
+                  // Convert string to JS object
+                  const content = d;
+                  // Map body
+                  content.body.forEach((item, index) => {
+                    // Get start time
+                    const from = secToTimer(item.from !== undefined ? item.from : 0);
+                    // Get end time
+                    const to = secToTimer(item.to);
+                    // Line
+                    text += index + 1 + "\n";
+                    // Time
+                    text += `${from.replace(".", ",")} --> ${to.replace(".", ",")}\n`;
+                    // Content
+                    text += item.content + "\n\n";
+                  });
+
                   //Create blob object of json subtitle
-                  var blob = new Blob([JSON.stringify(d)], {
-                    type: "application/json",
+                  var blob = new Blob([text], {
+                    type: "text/plain",
                   });
                   //Create <a> tag
                   var a = document.createElement("a");
-                  a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.json`;
+                  a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.srt`;
                   a.textContent = `${getEpTitle(ep_obj.title[index])} `;
                   // a.download = `sub.json`;
                   // a.textContent = `title`;
