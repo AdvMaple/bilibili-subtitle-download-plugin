@@ -147,10 +147,8 @@ CHANGE SUB_LANGUAGE to:
                 .then((d) => {
 
                   let text = "";
-                  // Convert string to JS object
-                  const content = d;
                   // Map body
-                  content.body.forEach((item, index) => {
+                  d.body.forEach((item, index) => {
                     // Get start time
                     const from = secToTimer(item.from !== undefined ? item.from : 0);
                     // Get end time
