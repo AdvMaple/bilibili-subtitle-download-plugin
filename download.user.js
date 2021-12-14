@@ -28,28 +28,50 @@ CHANGE SUB_LANGUAGE to:
   let cond1 = false;
   let cond2 = false;
   let sub_language = localStorage.getItem("SUB_LANGUAGE");
-  console.log(sub_language);
+  let sub_format = localStorage.getItem("SUB_FORMAT");
   if (sub_language === null) {
     localStorage.setItem("SUB_LANGUAGE", "vi");
   }
-
+  if (sub_format === null) {
+    localStorage.setItem("SUB_FORMAT", "json");
+  }
+  console.log(sub_language);
+  console.log(sub_format);
   function createSelectOption() {
     return `
-      <option value="vi" ${
-        sub_language === "vi" ? "selected" : ""
+      <option value="vi" ${sub_language === "vi" ? "selected" : ""
       }> Tiếng Việt </option>
-      <option value="id" ${
-        sub_language === "id" ? "selected" : ""
+      <option value="id" ${sub_language === "id" ? "selected" : ""
       }> Bahasa Indonesia </option>
-      <option value="en" ${
-        sub_language === "en" ? "selected" : ""
+      <option value="en" ${sub_language === "en" ? "selected" : ""
       }> English </option>
-      <option value="zh" ${
-        sub_language === "zh" ? "selected" : ""
+      <option value="zh" ${sub_language === "zh" ? "selected" : ""
       }> 中文（简体） </option>
-      <option value="th" ${
-        sub_language === "th" ? "selected" : ""
+      <option value="th" ${sub_language === "th" ? "selected" : ""
       }> ภาษาไทย </option>`;
+  }
+
+  function createSubFormatOptions() {
+    return `
+      <option value="json" ${sub_format === "json" ? "selected" : ""
+      }> JSON </option>
+      <option value="srt" ${sub_format === "srt" ? "selected" : ""
+      }> SRT </option>
+      <option value="vtt" ${sub_format === "vtt" ? "selected" : ""
+      }> Web VTT </option>`;
+  }
+
+  /**
+   * Convert second to time stamp
+   * @param {*} sec 
+   */
+  function secToTimer(sec) {
+    let o = new Date(0);
+    let p = new Date(sec * 1000);
+    return new Date(p.getTime() - o.getTime())
+      .toISOString()
+      .split("T")[1]
+      .split("Z")[0];
   }
 
   let zNode = document.createElement("div");
@@ -59,6 +81,9 @@ CHANGE SUB_LANGUAGE to:
 
     <select id="changeLanguage" class="subtitleSelect" name="lang" id="lang">
       ${createSelectOption()}
+    </select>
+    <select id="changeSubFormat" class="subtitleSelect" name="lang-format" id="lang-format">
+      ${createSubFormatOptions()}
     </select>
 
     <div class="linkContainer" id="jsonSubtitleList">Subtitle:\&nbsp;</div>
@@ -89,8 +114,16 @@ CHANGE SUB_LANGUAGE to:
     .getElementById("changeLanguage")
     .addEventListener("change", ChangeLanguage, false);
 
+  document
+    .getElementById("changeSubFormat")
+    .addEventListener("change", changeSubFormat, false);
+
   //When downloadSubtitle is click:
   function SubtitleDownloadAction(zEvent) {
+    // Reset
+    document.getElementById("jsonSubtitleList").innerHTML = 'Subtitle:\&nbsp;';
+    document.getElementById("videoList").innerHTML = 'Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
+    document.getElementById("audioList").innerHTML = 'Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
     //Get series id
     let id = window.location.href.match(/\d+/g); // Get all number in url
     let div_content =
@@ -137,13 +170,40 @@ CHANGE SUB_LANGUAGE to:
               fetch(ep_sub_url)
                 .then((r) => r.json())
                 .then((d) => {
+
+
                   //Create blob object of json subtitle
-                  var blob = new Blob([JSON.stringify(d)], {
-                    type: "application/json",
-                  });
+                  let blob;
+                  let text = "";
+                  // Generate SRT and Web VTT format
+                  if (sub_format === 'vtt' || sub_format === 'srt') {
+                    if (sub_format === 'vtt') {
+                      text += `WEBVTT\nKind: captions\nLanguage: ${sub_language}\n\n`
+                    }
+                    // Map body
+                    d.body.forEach((item, index) => {
+                      // Get start time
+                      const from = secToTimer(item.from !== undefined ? item.from : 0);
+                      // Get end time
+                      const to = secToTimer(item.to);
+                      // Line
+                      text += index + 1 + "\n";
+                      // Time
+                      text += `${from.replace(".", ",")} --> ${to.replace(".", ",")}\n`;
+                      // Content
+                      text += item.content + "\n\n";
+                    });
+                    blob = new Blob([text], {
+                      type: "text/plain",
+                    });
+                  } else { // Generate JSON format
+                    blob = new Blob([JSON.stringify(d)], {
+                      type: "application/json",
+                    });
+                  }
                   //Create <a> tag
                   var a = document.createElement("a");
-                  a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.json`;
+                  a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.${sub_format}`;
                   a.textContent = `${getEpTitle(ep_obj.title[index])} `;
                   // a.download = `sub.json`;
                   // a.textContent = `title`;
@@ -262,6 +322,11 @@ CHANGE SUB_LANGUAGE to:
   function ChangeLanguage(e) {
     localStorage.setItem("SUB_LANGUAGE", e.target.value);
     sub_language = e.target.value;
+  }
+
+  function changeSubFormat(e) {
+    localStorage.setItem("SUB_FORMAT", e.target.value);
+    sub_format = e.target.value;
   }
 
   function getEpTitle(title) {
