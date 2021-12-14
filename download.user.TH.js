@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.4
+// @version      0.5.5
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        www.bili*
@@ -28,29 +28,43 @@
   let cond1 = false;
   let cond2 = false;
   let sub_language = localStorage.getItem("SUB_LANGUAGE");
-  console.log(sub_language);
+  let sub_format = localStorage.getItem("SUB_FORMAT");
   if (sub_language === null) {
-    localStorage.setItem("SUB_LANGUAGE", "vi"); //เปลี่ยนตัวย่อตรงนี้เช่นต้องการภาษาเวียดนามเปลี่ยนเป็น vi
+    localStorage.setItem("SUB_LANGUAGE", "vi"); // เปลี่ยนตัวย่อตรงนี้เช่นต้องการภาษาเวียดนามเปลี่ยนเป็น vi
   }
-
+  if (sub_format === null) {
+    localStorage.setItem("SUB_FORMAT", "json");
+  }
+  console.log(sub_language);
+  console.log(sub_format);
   function createSelectOption() {
     return `
-        <option value="vi" ${sub_language === "vi" ? "selected" : ""
+      <option value="vi" ${sub_language === "vi" ? "selected" : ""
       }> Tiếng Việt </option>
-        <option value="id" ${sub_language === "id" ? "selected" : ""
+      <option value="id" ${sub_language === "id" ? "selected" : ""
       }> Bahasa Indonesia </option>
-        <option value="en" ${sub_language === "en" ? "selected" : ""
+      <option value="en" ${sub_language === "en" ? "selected" : ""
       }> English </option>
-        <option value="zh" ${sub_language === "zh" ? "selected" : ""
+      <option value="zh" ${sub_language === "zh" ? "selected" : ""
       }> 中文（简体） </option>
-        <option value="th" ${sub_language === "th" ? "selected" : ""
+      <option value="th" ${sub_language === "th" ? "selected" : ""
       }> ภาษาไทย </option>`;
   }
 
+  function createSubFormatOptions() {
+    return `
+      <option value="json" ${sub_format === "json" ? "selected" : ""
+      }> JSON </option>
+      <option value="srt" ${sub_format === "srt" ? "selected" : ""
+      }> SRT </option>
+      <option value="vtt" ${sub_format === "vtt" ? "selected" : ""
+      }> Web VTT </option>`;
+  }
+
   /**
- * Convert second to time stamp
- * @param {*} sec 
- */
+   * Convert second to time stamp
+   * @param {*} sec 
+   */
   function secToTimer(sec) {
     let o = new Date(0);
     let p = new Date(sec * 1000);
@@ -63,16 +77,19 @@
   let zNode = document.createElement("div");
 
   zNode.innerHTML = `
-      <button id="subtitleDownload" type="button" style="border-radius:20px;padding:8px;word-wrap: break-word;"> ดาวน์โหลดซับ </button>
+    <button id="subtitleDownload" type="button"> ดาวน์โหลดซับ </button>
 
-      <select id="changeLanguage" class="subtitleSelect" name="lang" id="lang">
-        ${createSelectOption()}
-      </select>
+    <select id="changeLanguage" class="subtitleSelect" name="lang" id="lang">
+      ${createSelectOption()}
+    </select>
+    <select id="changeSubFormat" class="subtitleSelect" name="lang-format" id="lang-format">
+      ${createSubFormatOptions()}
+    </select>
 
-      <div class="linkContainer" id="jsonSubtitleList" style="border-radius:20px;padding:4px;font-size:15px">คำบรรยาย\&nbsp;:\&nbsp;</div>
-      <div class="linkContainer" id="videoList" style="border-radius:20px;padding:4px;font-size:15px">วิดีโอ\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
-      <div class="linkContainer" id="audioList" style="border-radius:20px;padding:4px;font-size:15px">เสียง\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
-      `;
+    <div class="linkContainer" id="jsonSubtitleList" style="border-radius:20px;padding:4px;font-size:15px">คำบรรยาย\&nbsp;:\&nbsp;</div>
+    <div class="linkContainer" id="videoList" style="border-radius:20px;padding:4px;font-size:15px">วิดีโอ\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
+    <div class="linkContainer" id="audioList" style="border-radius:20px;padding:4px;font-size:15px">เสียง\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
+    `;
 
   zNode.setAttribute("id", "downloadBiliintScript");
   document.body.appendChild(zNode);
@@ -86,7 +103,7 @@
     Not yet added
     <button> Download Video </button>
     <button> Download Audio </button>
-
+  
   */
 
   document
@@ -97,8 +114,16 @@
     .getElementById("changeLanguage")
     .addEventListener("change", ChangeLanguage, false);
 
+  document
+    .getElementById("changeSubFormat")
+    .addEventListener("change", changeSubFormat, false);
+
   //When downloadSubtitle is click:
   function SubtitleDownloadAction(zEvent) {
+    // Reset
+    document.getElementById("jsonSubtitleList").innerHTML = 'คำบรรยาย\&nbsp;:\&nbsp;';
+    document.getElementById("videoList").innerHTML = 'วิดีโอ\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
+    document.getElementById("audioList").innerHTML = 'เสียง\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
     //Get series id
     let id = window.location.href.match(/\d+/g); // Get all number in url
     let div_content =
@@ -122,10 +147,14 @@
     }
 
     for (let i = 0; i < title_list.length; i++) {
-      let text = title_list[i].innerText.match(/^([\w\-]+)/)[0];
-      ep_obj.title.push(text);
+      let text = title_list[i].innerText.match(/^([\w\-]+)/);
+      try {
+        ep_obj.title.push(text[0]);
+      } catch (error) {
+        ep_obj.title.push(i + 1);
+      }
     }
-    console.log(ep_obj.title);
+    // console.log(ep_obj.title);
 
     ep_obj.id.map((ep_id, index) => {
       // console.log(ep_id, ep_obj.title[index]);
@@ -141,28 +170,40 @@
               fetch(ep_sub_url)
                 .then((r) => r.json())
                 .then((d) => {
-                  let text = "";
-                  // Map body
-                  d.body.forEach((item, index) => {
-                    // Get start time
-                    const from = secToTimer(item.from !== undefined ? item.from : 0);
-                    // Get end time
-                    const to = secToTimer(item.to);
-                    // Line
-                    text += index + 1 + "\n";
-                    // Time
-                    text += `${from.replace(".", ",")} --> ${to.replace(".", ",")}\n`;
-                    // Content
-                    text += item.content + "\n\n";
-                  });
+
 
                   //Create blob object of json subtitle
-                  var blob = new Blob([text], {
-                    type: "text/plain",
-                  });
+                  let blob;
+                  let text = "";
+                  // Generate SRT and Web VTT format
+                  if (sub_format === 'vtt' || sub_format === 'srt') {
+                    if (sub_format === 'vtt') {
+                      text += `WEBVTT\nKind: captions\nLanguage: ${sub_language}\n\n`
+                    }
+                    // Map body
+                    d.body.forEach((item, index) => {
+                      // Get start time
+                      const from = secToTimer(item.from !== undefined ? item.from : 0);
+                      // Get end time
+                      const to = secToTimer(item.to);
+                      // Line
+                      text += index + 1 + "\n";
+                      // Time
+                      text += `${from.replace(".", ",")} --> ${to.replace(".", ",")}\n`;
+                      // Content
+                      text += item.content + "\n\n";
+                    });
+                    blob = new Blob([text], {
+                      type: "text/plain",
+                    });
+                  } else { // Generate JSON format
+                    blob = new Blob([JSON.stringify(d)], {
+                      type: "application/json",
+                    });
+                  }
                   //Create <a> tag
                   var a = document.createElement("a");
-                  a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.srt`;
+                  a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.${sub_format}`;
                   a.textContent = `${getEpTitle(ep_obj.title[index])} `;
                   // a.download = `sub.json`;
                   // a.textContent = `title`;
@@ -234,7 +275,8 @@
       sorted = 1;
       var zNode = document.createElement("div");
       zNode.setAttribute("id", "BtnContainer");
-      zNode.innerHTML = '<button id="mySortBtn" type="button" style=""> กรอง </button>';
+      zNode.innerHTML =
+        '<button id="mySortBtn" type="button" style=""> Sort </button>';
 
       document.getElementById("downloadBiliintScript").appendChild(zNode);
       document
@@ -245,7 +287,6 @@
 
   function ButtonSortClick(zEvent) {
     var sort_by_num = function (a, b) {
-      console.log(a, b);
       return (
         Number(a.innerText.match(/\d+/g)[0]) -
         Number(b.innerText.match(/\d+/g)[0])
@@ -283,80 +324,96 @@
     sub_language = e.target.value;
   }
 
-  console.log("From  AdvMaple");
+  function changeSubFormat(e) {
+    localStorage.setItem("SUB_FORMAT", e.target.value);
+    sub_format = e.target.value;
+  }
+
+  function getEpTitle(title) {
+    console.log(title);
+    if (title === null) {
+      return "1";
+    }
+    return title;
+  }
+
+  console.log("From AdvMaple");
 
   // Style newly added button
   GM_addStyle(`
 
-    #downloadBiliintScript {
-        position:               fixed;
-        bottom:                 6rem;
-        left: 1rem;
-        margin: 3px;
-        z-index: 9999;
-        opacity:0.97;
+  #downloadBiliintScript {
+      position: fixed; 
+      bottom: 6rem;
+      left: 1rem;
+      margin: 3px;
+      z-index: 9999;
+      opacity: 0.97;
+  }
 
-    }
-    .linkContainer{
-      color: black;
+  .linkContainer{
+    color: black;
+    background: white;
+    opacity: 0.97;
+    margin: 2px;
+    border-radius: 20px;
+    padding: 4px;
+    font-size: 15px
+  }
+
+  #subtitleDownload {
+    cursor: pointer;
+    padding: 3px;
+    margin-bottom: 3px;
+    opacity:0.97;
+    border-radius: 20px;
+    padding: 8px;
+  }
+
+  #subtitleDownload:hover {
+    background-color: #6b9f25;
+    color: white;
+  }
+
+  #BtnContainer{
+    margin-top: 3px;
+    margin-bottom: 6px;
+    opacity: 0.97;
+  }
+  
+  #mySortBtn {
+    cursor: pointer;
+    padding: 3px;
+    border-radius:20px;
+    width: 100%;
+    background-color: #23427f;
+    color: white;
+    opacity: 0.99;
+  }
+  #mySortBtn:hover {
+    background-color: #38548b;
+    color: #d3d9e5;
+  }
+
+  #downloadBiliintScript a {
+      color: #4c93ff;
       background: white;
-      opacity:0.97;
-      margin: 2px;
-    }
-    #subtitleDownload {
-      cursor:                 pointer;
-      padding: 3px;
-      margin-bottom: 3px;
-      opacity:0.97;
+      opacity: 0.97;
+  }
 
+  #downloadBiliintScript a:hover {
+    color: #4078cb;
+    background: white;
+    opacity: 0.97;
+  }
 
-    }
-
-    #subtitleDownload:hover {
-      background-color: #6b9f25;
-      color: white;
-
-    }
-
-    #BtnContainer{
-      margin-top: 3px;
-      margin-bottom: 6px;
-      opacity:0.97;
-    }
-
-    #mySortBtn {
-      cursor:                 pointer;
-      padding: 3px;
-      border-radius:20px;
-      width:100%;
-      background-color:#23427f;
-      color:white;
-      opacity:0.99;
-    }
-    #mySortBtn:hover {
-      background-color: #38548b;
-      color: #d3d9e5;
-
-    }
-
-    #downloadBiliintScript a {
-        color:                  #4c93ff;
-        background:             white;
-        opacity:0.97;
-    }
-    #downloadBiliintScript a:hover {
-      color:                  #4078cb;
-      background:             white;
-      opacity:0.97;
-    }
-    .subtitleSelect {
-
-      margin-top: 3px;
-      margin-bottom: 6px;
-      border-radius:20px;
-      padding: 8px;
-      background:     white;
-      opacity:0.97;
-    }
-  `);
+  .subtitleSelect {
+    margin-top: 3px;
+    margin-bottom: 6px;
+    border-radius: 20px;
+    padding: 8px;
+    background: white;
+    opacity: 0.97;
+  }
+`);
 })();
