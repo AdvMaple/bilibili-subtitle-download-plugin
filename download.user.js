@@ -29,11 +29,13 @@ CHANGE SUB_LANGUAGE to:
   let cond2 = false;
   let sub_language = localStorage.getItem("SUB_LANGUAGE");
   let sub_format = localStorage.getItem("SUB_FORMAT");
-  if (sub_language === null) {
-    localStorage.setItem("SUB_LANGUAGE", "vi");
+  if (!sub_language) {
+    localStorage.setItem("SUB_LANGUAGE", "th");
+    sub_language = 'th';
   }
-  if (sub_format === null) {
-    localStorage.setItem("SUB_FORMAT", "json");
+  if (!sub_format) {
+    localStorage.setItem("SUB_FORMAT", "srt");
+    sub_format = 'srt';
   }
   console.log(sub_language);
   console.log(sub_format);
@@ -77,12 +79,12 @@ CHANGE SUB_LANGUAGE to:
   let zNode = document.createElement("div");
 
   zNode.innerHTML = `
-    <button id="subtitleDownload" type="button"> Download Sub </button>
+    <button id="subtitleDownload" type="button"> Generate Links </button>
 
-    <select id="changeLanguage" class="subtitleSelect" name="lang" id="lang">
+    <select id="changeLanguage" class="subtitleSelect" name="lang">
       ${createSelectOption()}
     </select>
-    <select id="changeSubFormat" class="subtitleSelect" name="lang-format" id="lang-format">
+    <select id="changeSubFormat" class="subtitleSelect" name="lang-format">
       ${createSubFormatOptions()}
     </select>
 

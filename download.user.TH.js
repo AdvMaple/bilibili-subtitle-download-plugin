@@ -29,11 +29,13 @@
   let cond2 = false;
   let sub_language = localStorage.getItem("SUB_LANGUAGE");
   let sub_format = localStorage.getItem("SUB_FORMAT");
-  if (sub_language === null) {
-    localStorage.setItem("SUB_LANGUAGE", "vi"); // เปลี่ยนตัวย่อตรงนี้เช่นต้องการภาษาเวียดนามเปลี่ยนเป็น vi
+  if (!sub_language) {
+    localStorage.setItem("SUB_LANGUAGE", "th");
+    sub_language = 'th';
   }
-  if (sub_format === null) {
-    localStorage.setItem("SUB_FORMAT", "json");
+  if (!sub_format) {
+    localStorage.setItem("SUB_FORMAT", "srt");
+    sub_format = 'srt';
   }
   console.log(sub_language);
   console.log(sub_format);
@@ -77,12 +79,12 @@
   let zNode = document.createElement("div");
 
   zNode.innerHTML = `
-    <button id="subtitleDownload" type="button"> ดาวน์โหลดซับ </button>
+    <button id="subtitleDownload" type="button"> ส้างลิ้งค์โหลด </button>
 
-    <select id="changeLanguage" class="subtitleSelect" name="lang" id="lang">
+    <select id="changeLanguage" class="subtitleSelect" name="lang">
       ${createSelectOption()}
     </select>
-    <select id="changeSubFormat" class="subtitleSelect" name="lang-format" id="lang-format">
+    <select id="changeSubFormat" class="subtitleSelect" name="lang-format">
       ${createSubFormatOptions()}
     </select>
 
