@@ -6,7 +6,7 @@
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
 // @include      /\:\/\/.*.bili.*\/play\/.*$/
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
-// @updateURL    https://github.com/AdvMaple/biliintl_subtitle_download_plugin/raw/main/download.user.js
+// @updateURL    https://github.com/xubmuajkub/biliint.com-bilibili.tv_subtitle_download_plugin/raw/main/download.user.js
 // @grant        GM_addStyle
 // @require      http://code.jquery.com/jquery-3.6.0.min.js
 
