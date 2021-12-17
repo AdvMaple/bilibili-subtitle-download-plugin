@@ -3,8 +3,8 @@
 // @version      0.5.5
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
-// @match        www.bili*
-// @include      /www.bili*/
+// @match        /\:\/\/.*.bili.*\/play\/.*$/
+// @include      /\:\/\/.*.bili.*\/play\/.*$/
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
 // @updateURL    https://github.com/AdvMaple/biliintl_subtitle_download_plugin/raw/main/download.user.js
 // @grant        GM_addStyle
