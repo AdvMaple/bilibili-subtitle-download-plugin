@@ -47,7 +47,7 @@ CHANGE SUB_LANGUAGE to:
       }> Bahasa Indonesia </option>
       <option value="en" ${sub_language === "en" ? "selected" : ""
       }> English </option>
-      <option value="zh" ${sub_language === "zh" ? "selected" : ""
+      <option value="zh" ${sub_language === "zh-Hans" ? "selected" : ""
       }> 中文（简体） </option>
       <option value="th" ${sub_language === "th" ? "selected" : ""
       }> ภาษาไทย </option>`;

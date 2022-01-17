@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.5
+// @version      0.5.7
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
@@ -47,7 +47,7 @@
       }> Bahasa Indonesia </option>
       <option value="en" ${sub_language === "en" ? "selected" : ""
       }> English </option>
-      <option value="zh" ${sub_language === "zh" ? "selected" : ""
+      <option value="zh" ${sub_language === "zh-Hans" ? "selected" : ""
       }> 中文（简体） </option>
       <option value="th" ${sub_language === "th" ? "selected" : ""
       }> ภาษาไทย </option>`;
@@ -137,7 +137,7 @@
       id: [],
       title: [],
     };
-    const ep_list = document.getElementsByClassName("video-episodes__panel")[0];
+    const ep_list = document.getElementsByClassName("select-ep__panel")[0];
     const a_list = ep_list.getElementsByTagName("a");
     const title_list = ep_list.getElementsByClassName(
       "across-card__info_title"
