@@ -1,4 +1,8 @@
-# 18/11/2021 UPDATE
+
+# Change Logs
+## 18/1/2022
+Fixed classname changed
+## 18/11/2021 UPDATE
 Bilibili just update their website, so old version will not be able to get download link.
 I have fixed these issue. Please update to the latest version.
 

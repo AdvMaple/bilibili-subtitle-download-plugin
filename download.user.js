@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.5
+// @version      0.5.7
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
 // @include      /\:\/\/.*.bili.*\/play\/.*$/
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
-// @updateURL    https://github.com/xubmuajkub/biliint.com-bilibili.tv_subtitle_download_plugin/raw/main/download.user.js
+// @updateURL    https://github.com/animerocker/biliint.com-bilibili.tv_subtitle_download_plugin/raw/main/download.user.js
 // @grant        GM_addStyle
 // @require      http://code.jquery.com/jquery-3.6.0.min.js
 
@@ -137,7 +137,7 @@ CHANGE SUB_LANGUAGE to:
       id: [],
       title: [],
     };
-    const ep_list = document.getElementsByClassName("video-episodes__panel")[0];
+    const ep_list = document.getElementsByClassName("select-ep__panel")[0];
     const a_list = ep_list.getElementsByTagName("a");
     const title_list = ep_list.getElementsByClassName(
       "across-card__info_title"
