@@ -1,11 +1,5 @@
-# 18/11/2021 UPDATE
-Bilibili just update their website, so old version will not be able to get download link.
-I have fixed these issue. Please update to the latest version.
-
-Current script issue: Only work in big screen size. If your UI have episode list on the right side of video player, the script will probably work.
-
-New feauture:
-Added Language Select.
+# 1/17/2022 UPDATE
+Bilibili just change 1 div name. So if you can't get download link, that's why.
 
 # Biliintl/Bilibili.tv Subtitle Download Script
 Use Tamper Monkey. Login for best video quality.

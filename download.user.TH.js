@@ -137,7 +137,7 @@
       id: [],
       title: [],
     };
-    const ep_list = document.getElementsByClassName("video-episodes__panel")[0];
+    const ep_list = document.getElementsByClassName("select-ep__panel")[0];
     const a_list = ep_list.getElementsByTagName("a");
     const title_list = ep_list.getElementsByClassName(
       "across-card__info_title"
