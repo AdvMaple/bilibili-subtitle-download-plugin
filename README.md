@@ -1,5 +1,6 @@
-# 1/17/2022 UPDATE
-Bilibili just change 1 div name. So if you can't get download link, that's why.
+# 1/23/2022 UPDATE
+1. Add quality selection options
+2. Add option to download the current episode
 
 # Biliintl/Bilibili.tv Subtitle Download Script
 Use Tamper Monkey. Login for best video quality.
