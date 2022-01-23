@@ -131,11 +131,16 @@ CHANGE SUB_LANGUAGE to:
   let zNode = document.createElement("div");
 
   const pathnameArr = location.pathname.split('/');
-  const thisEpId = pathnameArr[pathnameArr.length - 1];
-  const seriesId = pathnameArr[pathnameArr.length - 2];
+  let thisEpId, seriesId;
+  if (pathnameArr.length === 5) {
+    thisEpId = pathnameArr[pathnameArr.length - 1];
+    seriesId = pathnameArr[pathnameArr.length - 2];
+  } else {
+    seriesId = pathnameArr[pathnameArr.length - 1];
+  }
 
   zNode.innerHTML = `
-    <div>
+    <div id="gen-sigle">
       <button id="down-this" class="btn" type="button"> Generate Links for this EP </button>
     </div>
     <button id="subtitleDownload" class="btn" type="button"> Generate Links </button>
@@ -158,30 +163,41 @@ CHANGE SUB_LANGUAGE to:
   zNode.setAttribute("id", "downloadBiliintScript");
   document.body.appendChild(zNode);
 
-  fetch(
-    `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${thisEpId}&device=wap&platform=web&qn=64&tf=0&type=0`,
-    { credentials: "include" }
-  )
-    .then((r) => r.json())
-    .then(({ data }) => {
-      const d = data.playurl;
-      const qualities = d.video.map(item => ({
-        value: item.video_resource.quality,
-        label: item.stream_info.desc_words
-      }));
-      const options = createQualityOptions(qualities);
-      document.getElementById('changeQuality').innerHTML = options;
-    })
+  function _generateQualities(epId) {
+    fetch(
+      `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${epId}&device=wap&platform=web&qn=64&tf=0&type=0`,
+      { credentials: "include" }
+    )
+      .then((r) => r.json())
+      .then(({ data }) => {
+        const d = data.playurl;
+        const qualities = d.video.filter(item => !!item.video_resource.url).map(item => ({
+          value: item.video_resource.quality,
+          label: item.stream_info.desc_words
+        }));
+        const options = createQualityOptions(qualities);
+        document.getElementById('changeQuality').innerHTML = options;
+      })
+  }
 
-  // TODO: Get All Episodes from this API
-  // fetch(
-  //   `https://api.bilibili.tv/intl/gateway/web/v2/ogv/play/episodes?platform=web&season_id=${seriesId}`,
-  //   { credentials: "include" }
-  // )
-  //   .then((r) => r.json())
-  //   .then(({ data }) => {
-  //     console.log(data);
-  //   })
+  if (!thisEpId) {
+    fetch(
+      `https://api.bilibili.tv/intl/gateway/web/v2/ogv/play/episodes?platform=web&season_id=${seriesId}`,
+      { credentials: "include" }
+    )
+      .then((r) => r.json())
+      .then(({ data }) => {
+        if (data?.sections?.length > 0) {
+          const eps = data?.sections[0].episodes;
+          if (eps.length > 0) {
+            const epId = eps[0].episode_id;
+            _generateQualities(epId);
+          }
+        }
+      })
+  } else {
+    _generateQualities(thisEpId);
+  }
 
   /*
   <div id="downloadBiliintScript">
@@ -351,11 +367,13 @@ CHANGE SUB_LANGUAGE to:
   }
 
   function generateCurrenEpisodeElement() {
-    const title = document.title;
     const pathnameArr = location.pathname.split('/');
-    const epId = pathnameArr[pathnameArr.length - 1];
-    generateSubtitle(epId, title, null, true);
-    generateEpElement(epId, title);
+    let thisEpId = pathnameArr[pathnameArr.length - 1]
+    const title = document.title;
+    if (pathnameArr.length === 5) {
+      generateSubtitle(thisEpId, title, null, true);
+      generateEpElement(thisEpId, title);
+    }
   }
 
   //When downloadSubtitle is click:
