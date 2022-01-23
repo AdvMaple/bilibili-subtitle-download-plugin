@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.7
+// @version      0.5.8
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
@@ -29,6 +29,7 @@ CHANGE SUB_LANGUAGE to:
   let cond2 = false;
   let sub_language = localStorage.getItem("SUB_LANGUAGE");
   let sub_format = localStorage.getItem("SUB_FORMAT");
+  let selectedQuality = localStorage.getItem("VIDEO_QUALITY");
   if (!sub_language) {
     localStorage.setItem("SUB_LANGUAGE", "th");
     sub_language = 'th';
@@ -36,6 +37,10 @@ CHANGE SUB_LANGUAGE to:
   if (!sub_format) {
     localStorage.setItem("SUB_FORMAT", "srt");
     sub_format = 'srt';
+  }
+  if (!selectedQuality) {
+    localStorage.setItem("VIDEO_QUALITY", "112");
+    selectedQuality = '112';
   }
   console.log(sub_language);
   console.log(sub_format);
@@ -63,6 +68,36 @@ CHANGE SUB_LANGUAGE to:
       }> Web VTT </option>`;
   }
 
+  function createQualityOptions(options) {
+    const qualities = options || [
+      {
+        label: '4K',
+        value: 120,
+      },
+      {
+        label: '4K',
+        value: 112,
+      },
+      {
+        label: '4K',
+        value: 64,
+      },
+      {
+        label: '4K',
+        value: 32,
+      },
+      {
+        label: '4K',
+        value: 16,
+      },
+    ];
+    let el = '';
+    qualities.forEach((item) => {
+      el += `<option value="${item.value}" ${selectedQuality === `${item.value}` ? "selected" : ""}> ${item.label} </option>`;
+    })
+    return el;
+  }
+
   /**
    * Convert second to time stamp
    * @param {*} sec 
@@ -76,16 +111,43 @@ CHANGE SUB_LANGUAGE to:
       .split("Z")[0];
   }
 
+  /**
+   * Create vodeo link and append to element
+   * @param {*} url 
+   * @param {*} title 
+   */
+  function createVideoElement(url, title) {
+    const a = document.createElement("a");
+    // a.textContent = ` [${maxVideoQuality}]${title} `;
+    a.textContent = title;
+    // a.textContent = `VID `;
+    a.href = url;
+    a.download = "episode_url";
+    a.type = "video/mp4";
+
+    document.getElementById("videoList").appendChild(a);
+  }
+
   let zNode = document.createElement("div");
 
+  const pathnameArr = location.pathname.split('/');
+  const thisEpId = pathnameArr[pathnameArr.length - 1];
+  const seriesId = pathnameArr[pathnameArr.length - 2];
+
   zNode.innerHTML = `
-    <button id="subtitleDownload" type="button"> Generate Links </button>
+    <div>
+      <button id="down-this" class="btn" type="button"> Generate Links for this EP </button>
+    </div>
+    <button id="subtitleDownload" class="btn" type="button"> Generate Links </button>
 
     <select id="changeLanguage" class="subtitleSelect" name="lang">
       ${createSelectOption()}
     </select>
     <select id="changeSubFormat" class="subtitleSelect" name="lang-format">
       ${createSubFormatOptions()}
+    </select>
+    <select id="changeQuality" class="subtitleSelect" name="quality">
+      
     </select>
 
     <div class="linkContainer" id="jsonSubtitleList">Subtitle:\&nbsp;</div>
@@ -95,6 +157,31 @@ CHANGE SUB_LANGUAGE to:
 
   zNode.setAttribute("id", "downloadBiliintScript");
   document.body.appendChild(zNode);
+
+  fetch(
+    `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${thisEpId}&device=wap&platform=web&qn=64&tf=0&type=0`,
+    { credentials: "include" }
+  )
+    .then((r) => r.json())
+    .then(({ data }) => {
+      const d = data.playurl;
+      const qualities = d.video.map(item => ({
+        value: item.video_resource.quality,
+        label: item.stream_info.desc_words
+      }));
+      const options = createQualityOptions(qualities);
+      document.getElementById('changeQuality').innerHTML = options;
+    })
+
+  // TODO: Get All Episodes from this API
+  // fetch(
+  //   `https://api.bilibili.tv/intl/gateway/web/v2/ogv/play/episodes?platform=web&season_id=${seriesId}`,
+  //   { credentials: "include" }
+  // )
+  //   .then((r) => r.json())
+  //   .then(({ data }) => {
+  //     console.log(data);
+  //   })
 
   /*
   <div id="downloadBiliintScript">
@@ -113,12 +200,163 @@ CHANGE SUB_LANGUAGE to:
     .addEventListener("click", SubtitleDownloadAction, false);
 
   document
+    .getElementById("down-this")
+    .addEventListener("click", downloadThisEp, false);
+
+  document
     .getElementById("changeLanguage")
     .addEventListener("change", ChangeLanguage, false);
 
   document
     .getElementById("changeSubFormat")
     .addEventListener("change", changeSubFormat, false);
+
+  document
+    .getElementById("changeQuality")
+    .addEventListener("change", changeQuality, false);
+
+  /**
+   * Generate subtitle
+   * @param {*} ep_id 
+   * @param {string} title 
+   * @param {string} epTitle 
+   * @param {boolean} thisEp 
+   */
+  function generateSubtitle(ep_id, title, epTitle, thisEp) {
+    fetch(`https://api.bilibili.tv/intl/gateway/m/subtitle?ep_id=${ep_id}`)
+      .then((r) => r.json())
+      .then(({ data }) => {
+        //Take data in response
+        //Get number in subtitle files in data
+        for (let i = 0; i < data.subtitles.length; i++) {
+          if (data.subtitles[i].key == sub_language) {
+            var ep_sub_url = data.subtitles[i].url;
+            fetch(ep_sub_url)
+              .then((r) => r.json())
+              .then((d) => {
+
+
+                //Create blob object of json subtitle
+                let blob;
+                let text = "";
+                // Generate SRT and Web VTT format
+                if (sub_format === 'vtt' || sub_format === 'srt') {
+                  if (sub_format === 'vtt') {
+                    text += `WEBVTT\nKind: captions\nLanguage: ${sub_language}\n\n`
+                  }
+                  // Map body
+                  d.body.forEach((item, index) => {
+                    // Get start time
+                    const from = secToTimer(item.from !== undefined ? item.from : 0);
+                    // Get end time
+                    const to = secToTimer(item.to);
+                    // Line
+                    text += index + 1 + "\n";
+                    // Time
+                    text += `${from.replace(".", ",")} --> ${to.replace(".", ",")}\n`;
+                    // Content
+                    text += item.content + "\n\n";
+                  });
+                  blob = new Blob([text], {
+                    type: "text/plain",
+                  });
+                } else { // Generate JSON format
+                  blob = new Blob([JSON.stringify(d)], {
+                    type: "application/json",
+                  });
+                }
+                //Create <a> tag
+                var a = document.createElement("a");
+                a.download = !epTitle ? `${title}-${sub_language}.${sub_format}` : `${title}-ep-${epTitle}-${sub_language}.${sub_format}`;
+                a.textContent = thisEp ? title : `${getEpTitle(epTitle)} `;
+                // a.download = `sub.json`;
+                // a.textContent = `title`;
+                a.href = URL.createObjectURL(blob);
+                document.getElementById("jsonSubtitleList").appendChild(a);
+                // <a download="{animeName} ep {title}.json" href={URL.createObjectURL(blob)}> {title}</a>
+              });
+            break;
+          }
+        }
+      });
+  }
+
+  /**
+   * Genearate video ep
+   * @param {*} ep_id 
+   * @param {string} title 
+   */
+  function generateEpElement(ep_id, title) {
+    fetch(
+      `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${ep_id}&device=wap&platform=web&qn=64&tf=0&type=0`,
+      { credentials: "include" }
+    )
+      .then((r) => r.json())
+      .then(({ data }) => {
+        const d = data.playurl;
+
+        const suggestQuality = d.quality;
+        var maxVideoQuality = 0;
+        var maxAudioQuality = 0;
+        let episode_url = '';
+        const userSelectedQuality = Number(selectedQuality);
+        const vidIndex = d.video.findIndex(item => item.video_resource.quality === userSelectedQuality);
+        let runLoop = false;
+        if (vidIndex > -1) {
+          const videoUrl = d.video[vidIndex].video_resource.url;
+          if (videoUrl) {
+            createVideoElement(videoUrl, `${title} `);
+          } else {
+            runLoop = true;
+          }
+        } else {
+          runLoop = true;
+        }
+
+        if (runLoop) {
+          //VIDEO LOOP
+          for (let i = 0; i < d.video.length; i++) {
+            episode_url = d.video[i]["video_resource"].url;
+            if (episode_url !== "") {
+              if (maxVideoQuality < d.video[i]["video_resource"].quality) {
+                maxVideoQuality = d.video[i]["video_resource"].quality;
+
+                createVideoElement(episode_url, `${title} `);
+              }
+            }
+          }
+        }
+
+        //AUDIO LOOP
+
+        for (let i = 0; i < d["audio_resource"].length; i++) {
+          const audio_url = d["audio_resource"][i].url;
+          if (audio_url !== "") {
+            if (maxAudioQuality < d["audio_resource"][i].quality) {
+              maxAudioQuality = d["audio_resource"][i].quality;
+
+              var a = document.createElement("a");
+              a.textContent = `${title} `;
+              // a.textContent = `AUDIO`;
+              // a.textContent = ` [${maxAudioQuality}]${title}`;
+              a.href = audio_url;
+              a.download = "audio_url";
+              a.type = "video/mp4";
+
+              document.getElementById("audioList").appendChild(a);
+            }
+          }
+        }
+      });
+  }
+
+  function generateCurrenEpisodeElement() {
+    const title = document.title;
+    const pathnameArr = location.pathname.split('/');
+    const epId = pathnameArr[pathnameArr.length - 1];
+    generateSubtitle(epId, title, null, true);
+    generateEpElement(epId, title);
+  }
 
   //When downloadSubtitle is click:
   function SubtitleDownloadAction(zEvent) {
@@ -161,115 +399,9 @@ CHANGE SUB_LANGUAGE to:
     ep_obj.id.map((ep_id, index) => {
       // console.log(ep_id, ep_obj.title[index]);
       // Get list of subtitle in episode
-      fetch(`https://api.bilibili.tv/intl/gateway/m/subtitle?ep_id=${ep_id}`)
-        .then((r) => r.json())
-        .then(({ data }) => {
-          //Take data in response
-          //Get number in subtitle files in data
-          for (let i = 0; i < data.subtitles.length; i++) {
-            if (data.subtitles[i].key == sub_language) {
-              var ep_sub_url = data.subtitles[i].url;
-              fetch(ep_sub_url)
-                .then((r) => r.json())
-                .then((d) => {
-
-
-                  //Create blob object of json subtitle
-                  let blob;
-                  let text = "";
-                  // Generate SRT and Web VTT format
-                  if (sub_format === 'vtt' || sub_format === 'srt') {
-                    if (sub_format === 'vtt') {
-                      text += `WEBVTT\nKind: captions\nLanguage: ${sub_language}\n\n`
-                    }
-                    // Map body
-                    d.body.forEach((item, index) => {
-                      // Get start time
-                      const from = secToTimer(item.from !== undefined ? item.from : 0);
-                      // Get end time
-                      const to = secToTimer(item.to);
-                      // Line
-                      text += index + 1 + "\n";
-                      // Time
-                      text += `${from.replace(".", ",")} --> ${to.replace(".", ",")}\n`;
-                      // Content
-                      text += item.content + "\n\n";
-                    });
-                    blob = new Blob([text], {
-                      type: "text/plain",
-                    });
-                  } else { // Generate JSON format
-                    blob = new Blob([JSON.stringify(d)], {
-                      type: "application/json",
-                    });
-                  }
-                  //Create <a> tag
-                  var a = document.createElement("a");
-                  a.download = `${div_content}-ep-${ep_obj.title[index]}-${sub_language}.${sub_format}`;
-                  a.textContent = `${getEpTitle(ep_obj.title[index])} `;
-                  // a.download = `sub.json`;
-                  // a.textContent = `title`;
-                  a.href = URL.createObjectURL(blob);
-                  document.getElementById("jsonSubtitleList").appendChild(a);
-                  // <a download="{animeName} ep {title}.json" href={URL.createObjectURL(blob)}> {title}</a>
-                });
-              break;
-            }
-          }
-        });
-
+      generateSubtitle(ep_id, div_content, ep_obj.title[index]);
       //Get list of video and audio in episode
-      fetch(
-        `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${ep_id}&device=wap&platform=web&qn=64&tf=0&type=0`,
-        { credentials: "include" }
-      )
-        .then((r) => r.json())
-        .then(({ data }) => {
-          const d = data.playurl;
-
-          const suggestQuality = d.quality;
-          var maxVideoQuality = 0;
-          var maxAudioQuality = 0;
-          //VIDEO LOOP
-          for (let i = 0; i < d.video.length; i++) {
-            episode_url = d.video[i]["video_resource"].url;
-            if (episode_url !== "") {
-              if (maxVideoQuality < d.video[i]["video_resource"].quality) {
-                maxVideoQuality = d.video[i]["video_resource"].quality;
-
-                var a = document.createElement("a");
-                // a.textContent = ` [${maxVideoQuality}]${title} `;
-                a.textContent = `${ep_obj.title[index]} `;
-                // a.textContent = `VID `;
-                a.href = episode_url;
-                a.download = "episode_url";
-                a.type = "video/mp4";
-
-                document.getElementById("videoList").appendChild(a);
-              }
-            }
-          }
-          //AUDIO LOOP
-
-          for (let i = 0; i < d["audio_resource"].length; i++) {
-            audio_url = d["audio_resource"][i].url;
-            if (episode_url !== "") {
-              if (maxAudioQuality < d["audio_resource"][i].quality) {
-                maxAudioQuality = d["audio_resource"][i].quality;
-
-                var a = document.createElement("a");
-                a.textContent = `${ep_obj.title[index]} `;
-                // a.textContent = `AUDIO`;
-                // a.textContent = ` [${maxAudioQuality}]${title}`;
-                a.href = audio_url;
-                a.download = "episode_url";
-                a.type = "video/mp4";
-
-                document.getElementById("audioList").appendChild(a);
-              }
-            }
-          }
-        });
+      generateEpElement(ep_id, ep_obj.title[index]);
     });
 
     if (sorted == 0) {
@@ -285,6 +417,15 @@ CHANGE SUB_LANGUAGE to:
         .getElementById("mySortBtn")
         .addEventListener("click", ButtonSortClick, false);
     }
+  }
+
+  function downloadThisEp(e) {
+    // Reset
+    document.getElementById("jsonSubtitleList").innerHTML = 'Subtitle:\&nbsp;';
+    document.getElementById("videoList").innerHTML = 'Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
+    document.getElementById("audioList").innerHTML = 'Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
+
+    generateCurrenEpisodeElement();
   }
 
   function ButtonSortClick(zEvent) {
@@ -331,6 +472,11 @@ CHANGE SUB_LANGUAGE to:
     sub_format = e.target.value;
   }
 
+  function changeQuality(e) {
+    localStorage.setItem("VIDEO_QUALITY", e.target.value);
+    selectedQuality = e.target.value;
+  }
+
   function getEpTitle(title) {
     console.log(title);
     if (title === null) {
@@ -363,7 +509,7 @@ CHANGE SUB_LANGUAGE to:
     font-size: 15px
   }
 
-  #subtitleDownload {
+  .btn {
     cursor: pointer;
     padding: 3px;
     margin-bottom: 3px;
@@ -372,7 +518,7 @@ CHANGE SUB_LANGUAGE to:
     padding: 8px;
   }
 
-  #subtitleDownload:hover {
+  .btn:hover {
     background-color: #6b9f25;
     color: white;
   }
