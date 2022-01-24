@@ -366,13 +366,22 @@ CHANGE SUB_LANGUAGE to:
       });
   }
 
-  function generateCurrenEpisodeElement() {
-    const pathnameArr = location.pathname.split('/');
-    let thisEpId = pathnameArr[pathnameArr.length - 1]
+  function generateCurrentEpisodeElement() {
     const title = document.title;
-    if (pathnameArr.length === 5) {
+    if (thisEpId) {
       generateSubtitle(thisEpId, title, null, true);
       generateEpElement(thisEpId, title);
+    } else {
+      const classes = document.getElementsByClassName('panel-item__active');
+      if (classes.length > 0) {
+        const link = classes[0].firstChild;
+        if (link.href) {
+          const arr = link.href.split('/');
+          const epId = arr[arr.length - 1];
+          generateSubtitle(epId, title, null, true);
+          generateEpElement(epId, title);
+        }
+      }
     }
   }
 
@@ -443,7 +452,7 @@ CHANGE SUB_LANGUAGE to:
     document.getElementById("videoList").innerHTML = 'Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
     document.getElementById("audioList").innerHTML = 'Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
 
-    generateCurrenEpisodeElement();
+    generateCurrentEpisodeElement();
   }
 
   function ButtonSortClick(zEvent) {
