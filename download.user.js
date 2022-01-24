@@ -23,6 +23,24 @@ CHANGE SUB_LANGUAGE to:
 
 // Script start here
 (function () {
+
+  const LANGS = {
+    en: {
+      gen_this_link: 'Generate Links for this EP',
+      gen_links: 'Generate Links',
+      subtitle: 'Subtitle',
+      video: 'Video',
+      audio: 'Audio',
+    },
+    th: {
+      gen_this_link: 'ส้างลิ้งค์โหลดสำหรับตอนนี้',
+      gen_links: 'ส้างลิ้งค์โหลด',
+      subtitle: 'คำบรรยาย',
+      video: 'วิดีโอ',
+      audio: 'เสียง',
+    }
+  }
+
   // Create download sub button
   let sorted = 0;
   let cond1 = false;
@@ -42,6 +60,19 @@ CHANGE SUB_LANGUAGE to:
     localStorage.setItem("VIDEO_QUALITY", "112");
     selectedQuality = '112';
   }
+  const pathnameArr = location.pathname.split('/');
+  let appLang = pathnameArr[1];
+  if (!['en', 'th'].includes(appLang)) {
+    appLang = 'en';
+  }
+  let thisEpId, seriesId;
+  if (pathnameArr.length === 5) {
+    thisEpId = pathnameArr[pathnameArr.length - 1];
+    seriesId = pathnameArr[pathnameArr.length - 2];
+  } else {
+    seriesId = pathnameArr[pathnameArr.length - 1];
+  }
+
   console.log(sub_language);
   console.log(sub_format);
   function createSelectOption() {
@@ -130,20 +161,11 @@ CHANGE SUB_LANGUAGE to:
 
   let zNode = document.createElement("div");
 
-  const pathnameArr = location.pathname.split('/');
-  let thisEpId, seriesId;
-  if (pathnameArr.length === 5) {
-    thisEpId = pathnameArr[pathnameArr.length - 1];
-    seriesId = pathnameArr[pathnameArr.length - 2];
-  } else {
-    seriesId = pathnameArr[pathnameArr.length - 1];
-  }
-
   zNode.innerHTML = `
     <div id="gen-sigle">
-      <button id="down-this" class="btn" type="button"> Generate Links for this EP </button>
+      <button id="down-this" class="btn" type="button"> ${LANGS[appLang].gen_this_link} </button>
     </div>
-    <button id="subtitleDownload" class="btn" type="button"> Generate Links </button>
+    <button id="subtitleDownload" class="btn" type="button"> ${LANGS[appLang].gen_links} </button>
 
     <select id="changeLanguage" class="subtitleSelect" name="lang">
       ${createSelectOption()}
@@ -155,9 +177,9 @@ CHANGE SUB_LANGUAGE to:
       
     </select>
 
-    <div class="linkContainer" id="jsonSubtitleList">Subtitle:\&nbsp;</div>
-    <div class="linkContainer" id="videoList" >Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
-    <div class="linkContainer" id="audioList" >Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;</div>
+    <div class="linkContainer" id="jsonSubtitleList">${LANGS[appLang].subtitle}\&nbsp;:\&nbsp;</div>
+    <div class="linkContainer" id="videoList" >${LANGS[appLang].video}\&nbsp;:\&nbsp;</div>
+    <div class="linkContainer" id="audioList" >${LANGS[appLang].audio}\&nbsp;:\&nbsp;</div>
     `;
 
   zNode.setAttribute("id", "downloadBiliintScript");
@@ -203,8 +225,8 @@ CHANGE SUB_LANGUAGE to:
   <div id="downloadBiliintScript">
     <button id="subtitleDownload" type="button"> Download Sub </button>
   </div>
-
-
+ 
+ 
     Not yet added
     <button> Download Video </button>
     <button> Download Audio </button>
@@ -385,12 +407,16 @@ CHANGE SUB_LANGUAGE to:
     }
   }
 
+  function resetContent() {
+    document.getElementById("jsonSubtitleList").innerHTML = `${LANGS[appLang].subtitle}\&nbsp;:\&nbsp;`;
+    document.getElementById("videoList").innerHTML = `${LANGS[appLang].video}\&nbsp;:\&nbsp;`;
+    document.getElementById("audioList").innerHTML = `${LANGS[appLang].audio}\&nbsp;:\&nbsp;`;
+  }
+
   //When downloadSubtitle is click:
   function SubtitleDownloadAction(zEvent) {
     // Reset
-    document.getElementById("jsonSubtitleList").innerHTML = 'Subtitle:\&nbsp;';
-    document.getElementById("videoList").innerHTML = 'Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
-    document.getElementById("audioList").innerHTML = 'Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
+    resetContent();
     //Get series id
     let id = window.location.href.match(/\d+/g); // Get all number in url
     let div_content =
@@ -448,9 +474,7 @@ CHANGE SUB_LANGUAGE to:
 
   function downloadThisEp(e) {
     // Reset
-    document.getElementById("jsonSubtitleList").innerHTML = 'Subtitle:\&nbsp;';
-    document.getElementById("videoList").innerHTML = 'Video\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
-    document.getElementById("audioList").innerHTML = 'Audio\&nbsp;\&nbsp;\&nbsp;:\&nbsp;';
+    resetContent();
 
     generateCurrentEpisodeElement();
   }
