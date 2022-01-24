@@ -6,6 +6,8 @@
 Use Tamper Monkey. Login for best video quality.
 Enable Check Update for Tamper Monkey, I regularly fix any bug that happen.
 
+A fork of better dev than me: https://github.com/animerocker/biliint.com-bilibili.tv_subtitle_download_plugin
+
 ## How to install
   1. Install Tamper Monkey plugin for your browser.
   2. Use the install scipt link: https://github.com/AdvMaple/biliintl_subtitle_download_plugin/raw/feature/download.user.js. Tamper Monkey will auto detect it and install it for you.
