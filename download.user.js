@@ -390,6 +390,11 @@ CHANGE SUB_LANGUAGE to:
 
   function generateCurrentEpisodeElement() {
     const title = document.title;
+    let thisEpId;
+    const pathnameArr = location.pathname.split('/');
+    if (pathnameArr.length === 5) {
+      thisEpId = pathnameArr[pathnameArr.length - 1];
+    }
     if (thisEpId) {
       generateSubtitle(thisEpId, title, null, true);
       generateEpElement(thisEpId, title);
