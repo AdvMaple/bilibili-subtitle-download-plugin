@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.8
+// @version      0.5.9
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
@@ -161,11 +161,12 @@ CHANGE SUB_LANGUAGE to:
 
   let zNode = document.createElement("div");
 
+  // <button id="subtitleDownload" class="btn" type="button"> ${LANGS[appLang].gen_links} </button>
   zNode.innerHTML = `
     <div id="gen-sigle">
       <button id="down-this" class="btn" type="button"> ${LANGS[appLang].gen_this_link} </button>
     </div>
-    <button id="subtitleDownload" class="btn" type="button"> ${LANGS[appLang].gen_links} </button>
+    
 
     <select id="changeLanguage" class="subtitleSelect" name="lang">
       ${createSelectOption()}
@@ -233,9 +234,9 @@ CHANGE SUB_LANGUAGE to:
   
   */
 
-  document
-    .getElementById("subtitleDownload")
-    .addEventListener("click", SubtitleDownloadAction, false);
+  // document
+  //   .getElementById("subtitleDownload")
+  //   .addEventListener("click", SubtitleDownloadAction, false);
 
   document
     .getElementById("down-this")
