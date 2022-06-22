@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.9
+// @version      0.5.10
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
@@ -262,13 +262,15 @@ CHANGE SUB_LANGUAGE to:
    * @param {boolean} thisEp 
    */
   function generateSubtitle(ep_id, title, epTitle, thisEp) {
-    fetch(`https://api.bilibili.tv/intl/gateway/m/subtitle?ep_id=${ep_id}`)
+    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?platform=web&episode_id=${ep_id}&spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all`;
+    fetch(FETCH_URL, {credentials: "include"})
       .then((r) => r.json())
       .then(({ data }) => {
+        if (data.subtitles === null) alert("There has been some problems, please contract dev");
         //Take data in response
         //Get number in subtitle files in data
         for (let i = 0; i < data.subtitles.length; i++) {
-          if (data.subtitles[i].key == sub_language) {
+          if (data.subtitles[i]["lang_key"] == sub_language) {
             var ep_sub_url = data.subtitles[i].url;
             fetch(ep_sub_url)
               .then((r) => r.json())
@@ -395,6 +397,8 @@ CHANGE SUB_LANGUAGE to:
     const pathnameArr = location.pathname.split('/');
     if (pathnameArr.length === 5) {
       thisEpId = pathnameArr[pathnameArr.length - 1];
+    } else {
+      alert("Please choose an episode first to have episode ID");
     }
     if (thisEpId) {
       generateSubtitle(thisEpId, title, null, true);
