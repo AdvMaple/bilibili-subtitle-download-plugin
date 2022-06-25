@@ -16,9 +16,10 @@
 CHANGE SUB_LANGUAGE to:
 "en" for English
 "th" สำหรับภาษาไทย
-"zh-Hans" 中國人
+"zh-Hans" 为简体中文
 "vi" cho người việt nam
 "id" untuk Bahasa Indonesia
+"ms" untuk Bahasa Melayu
 */
 
 // Script start here
@@ -86,7 +87,9 @@ CHANGE SUB_LANGUAGE to:
       <option value="zh-Hans" ${sub_language === "zh-Hans" ? "selected" : ""
       }> 中文（简体） </option>
       <option value="th" ${sub_language === "th" ? "selected" : ""
-      }> ภาษาไทย </option>`;
+      }> ภาษาไทย </option>
+      <option value="ms" ${sub_language === "ms" ? "selected" : ""
+      }> Bahasa Melayu </option>`;
   }
 
   function createSubFormatOptions() {
