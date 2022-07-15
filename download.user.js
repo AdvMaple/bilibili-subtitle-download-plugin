@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         bili international download
-// @version      0.5.10
+// @version      0.5.11
 // @description  download json subtitle from biliintl
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
@@ -265,7 +265,7 @@ CHANGE SUB_LANGUAGE to:
    * @param {boolean} thisEp 
    */
   function generateSubtitle(ep_id, title, epTitle, thisEp) {
-    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?platform=web&episode_id=${ep_id}&spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all`;
+    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=vi_VN&platform=web&episode_id=${ep_id}&spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all`;
     fetch(FETCH_URL, {credentials: "include"})
       .then((r) => r.json())
       .then(({ data }) => {
