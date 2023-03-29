@@ -1,6 +1,7 @@
-# 22/6/2022 UPDATE
-1. Fix subtitle api url.
-2. Fix variable key cause api changes.
+# 29/3/2023
+1. Update download link for .ass file 🎉🎉 (Bilibili finally support ass for typesetting)
+2. Add toast message when ass file is generated
+3. Add Changelog.md file
 
 ## TODO:  
 1. Change to typescripts + add api schema validation
@@ -8,14 +9,6 @@
 3. Fix styling?
 4. Add more UX feature: Don't have to have episode ID on url,...
 5. Add debugging feature.
-
-
-# 3/5/2022 UPDATE
-1. Remove list all link button - Bilibili has implement a ddos guard, so I have to disable this for less API calls.
-
-# 1/23/2022 UPDATE
-1. Add quality selection options
-2. Add option to download the current episode
 
 # Biliintl/Bilibili.tv Subtitle Download Script
 Use Tamper Monkey. Login for best video quality.
