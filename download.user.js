@@ -33,8 +33,8 @@ CHANGE SUB_LANGUAGE to:
       audio: "Audio",
     },
     th: {
-      gen_this_link: "ส้างลิ้งค์โหลดสำหรับตอนนี้",
-      gen_links: "ส้างลิ้งค์โหลด",
+      gen_this_link: "สร้างการดาวน์โหลดสำหรับ EP นี้",
+      gen_links: "สร้างการดาวน์โหลด",
       subtitle: "คำบรรยาย",
       video: "วิดีโอ",
       audio: "เสียง",
