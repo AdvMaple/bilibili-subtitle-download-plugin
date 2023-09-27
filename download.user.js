@@ -24,10 +24,58 @@ CHANGE SUB_LANGUAGE to:
 
 // Script start here
 (function () {
-  const USER_OPTIONS = {
+  const DEFAULT_USER_OPTIONS = {
     sub_language: "vi",
-    sub_format: "srt"
+    sub_format: "srt",
+    video_quality: 112,
+    video_codec: 12
   };
+
+  const VIDEO_CODECS = [
+    {
+      id: 7,
+      label: "AVC"
+    },
+    {
+      id: 12,
+      label: "HEVC"
+    }
+  ];
+
+  const VIDEO_QUALITIES = [
+    {
+      id: 120,
+      label: "4K"
+    },
+    {
+      id: 112,
+      label: "1080P(HD)"
+    },
+    {
+      id: 80,
+      label: "1080P"
+    },
+    {
+      id: 64,
+      label: "720P"
+    },
+    {
+      id: 32,
+      label: "480P"
+    },
+    {
+      id: 16,
+      label: "320P"
+    },
+    {
+      id: 6,
+      label: "240P"
+    },
+    {
+      id: 5,
+      label: "144P"
+    }
+  ];
 
   const LANGS = {
     en: {
@@ -48,23 +96,31 @@ CHANGE SUB_LANGUAGE to:
 
   // Create download sub button
   let sorted = 0;
-  let cond1 = false;
-  let cond2 = false;
+
   let sub_language = localStorage.getItem("SUB_LANGUAGE");
-  let sub_format = localStorage.getItem("SUB_FORMAT");
-  let selectedQuality = localStorage.getItem("VIDEO_QUALITY");
   if (!sub_language) {
-    localStorage.setItem("SUB_LANGUAGE", USER_OPTIONS.sub_language);
-    sub_language = USER_OPTIONS.sub_language;
+    localStorage.setItem("SUB_LANGUAGE", DEFAULT_USER_OPTIONS.sub_language);
+    sub_language = DEFAULT_USER_OPTIONS.sub_language;
   }
+
+  let sub_format = localStorage.getItem("SUB_FORMAT");
   if (!sub_format) {
-    localStorage.setItem("SUB_FORMAT", USER_OPTIONS.sub_format);
-    sub_format = USER_OPTIONS.sub_format;
+    localStorage.setItem("SUB_FORMAT", DEFAULT_USER_OPTIONS.sub_format);
+    sub_format = DEFAULT_USER_OPTIONS.sub_format;
   }
+
+  let selectedQuality = localStorage.getItem("VIDEO_QUALITY");
   if (!selectedQuality) {
-    localStorage.setItem("VIDEO_QUALITY", "112");
-    selectedQuality = "112";
+    localStorage.setItem("VIDEO_QUALITY", DEFAULT_USER_OPTIONS.video_quality);
+    selectedQuality = DEFAULT_USER_OPTIONS.video_quality;
   }
+
+  let selectedCodec = localStorage.getItem("VIDEO_CODEC");
+  if (!selectedCodec) {
+    localStorage.setItem("VIDEO_CODEC", DEFAULT_USER_OPTIONS.video_codec);
+    selectedCodec = DEFAULT_USER_OPTIONS.video_codec;
+  }
+
   const pathnameArr = location.pathname.split("/");
   let appLang = pathnameArr[1];
   if (!["en", "th"].includes(appLang)) {
@@ -116,34 +172,38 @@ CHANGE SUB_LANGUAGE to:
   }
 
   function createQualityOptions(options) {
-    const qualities = options || [
-      {
-        label: "4K",
-        value: 120
-      },
-      {
-        label: "4K",
-        value: 112
-      },
-      {
-        label: "4K",
-        value: 64
-      },
-      {
-        label: "4K",
-        value: 32
-      },
-      {
-        label: "4K",
-        value: 16
-      }
-    ];
+    const _getCodecLabel = (codecId) => {
+      const matchedCodec =
+        VIDEO_CODECS.find((item) => item.id === codecId) || {};
+      return matchedCodec.label || "Unknown Codec";
+    };
+
+    const _sortBy =
+      (keyName = "") =>
+      (a, b) => {
+        if (a[keyName] < b[keyName]) {
+          return 1;
+        } else if (a[keyName] > b[keyName]) {
+          return -1;
+        }
+
+        return 0;
+      };
+
+    const qualities = options || VIDEO_QUALITIES;
+
     let el = "";
-    qualities.forEach((item) => {
-      el += `<option value="${item.value}" ${
-        selectedQuality === `${item.value}` ? "selected" : ""
-      }> ${item.label} </option>`;
-    });
+    qualities
+      .sort(_sortBy("codec_id"))
+      .sort(_sortBy("id"))
+      .forEach((item) => {
+        el += `<option value="${item.id};${item.codec_id}" ${
+          selectedQuality === `${item.id}` &&
+          selectedCodec === `${item.codec_id}`
+            ? "selected"
+            : ""
+        }>[${_getCodecLabel(item.codec_id)}] ${item.label} </option>`;
+      });
     return el;
   }
 
@@ -224,9 +284,11 @@ CHANGE SUB_LANGUAGE to:
         const qualities = d.video
           .filter((item) => !!item.video_resource.url)
           .map((item) => ({
-            value: item.video_resource.quality,
+            codec_id: item.video_resource.codec_id,
+            id: item.video_resource.quality,
             label: item.stream_info.desc_words
           }));
+
         const options = createQualityOptions(qualities);
         document.getElementById("changeQuality").innerHTML = options;
       });
@@ -250,22 +312,6 @@ CHANGE SUB_LANGUAGE to:
   } else {
     _generateQualities(thisEpId);
   }
-
-  /*
-  <div id="downloadBiliintScript">
-    <button id="subtitleDownload" type="button"> Download Sub </button>
-  </div>
-
-
-    Not yet added
-    <button> Download Video </button>
-    <button> Download Audio </button>
-
-  */
-
-  // document
-  //   .getElementById("subtitleDownload")
-  //   .addEventListener("click", SubtitleDownloadAction, false);
 
   document
     .getElementById("down-this")
@@ -409,13 +455,17 @@ CHANGE SUB_LANGUAGE to:
       .then(({ data }) => {
         const d = data.playurl;
 
-        const suggestQuality = d.quality;
         var maxVideoQuality = 0;
         var maxAudioQuality = 0;
         let episode_url = "";
+
         const userSelectedQuality = Number(selectedQuality);
+        const userSelectedCodec = Number(selectedCodec);
+
         const vidIndex = d.video.findIndex(
-          (item) => item.video_resource.quality === userSelectedQuality
+          (item) =>
+            item.video_resource.quality === userSelectedQuality &&
+            item.video_resource.codec_id === userSelectedCodec
         );
         let runLoop = false;
         if (vidIndex > -1) {
@@ -615,8 +665,13 @@ CHANGE SUB_LANGUAGE to:
   }
 
   function changeQuality(e) {
-    localStorage.setItem("VIDEO_QUALITY", e.target.value);
+    const values = e.target.value.split(";");
+
+    localStorage.setItem("VIDEO_QUALITY", values[0]);
     selectedQuality = e.target.value;
+
+    localStorage.setItem("VIDEO_CODEC", values[1]);
+    selectedCodec = e.target.value;
   }
 
   function getEpTitle(title) {
