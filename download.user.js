@@ -24,21 +24,26 @@ CHANGE SUB_LANGUAGE to:
 
 // Script start here
 (function () {
+  const USER_OPTIONS = {
+    sub_language: "vi",
+    sub_format: "srt"
+  };
+
   const LANGS = {
     en: {
       gen_this_link: "Generate Links for this EP",
       gen_links: "Generate Links",
       subtitle: "Subtitle",
       video: "Video",
-      audio: "Audio",
+      audio: "Audio"
     },
     th: {
       gen_this_link: "สร้างการดาวน์โหลดสำหรับ EP นี้",
       gen_links: "สร้างการดาวน์โหลด",
       subtitle: "คำบรรยาย",
       video: "วิดีโอ",
-      audio: "เสียง",
-    },
+      audio: "เสียง"
+    }
   };
 
   // Create download sub button
@@ -49,12 +54,12 @@ CHANGE SUB_LANGUAGE to:
   let sub_format = localStorage.getItem("SUB_FORMAT");
   let selectedQuality = localStorage.getItem("VIDEO_QUALITY");
   if (!sub_language) {
-    localStorage.setItem("SUB_LANGUAGE", "th");
-    sub_language = "th";
+    localStorage.setItem("SUB_LANGUAGE", USER_OPTIONS.sub_language);
+    sub_language = USER_OPTIONS.sub_language;
   }
   if (!sub_format) {
-    localStorage.setItem("SUB_FORMAT", "srt");
-    sub_format = "srt";
+    localStorage.setItem("SUB_FORMAT", USER_OPTIONS.sub_format);
+    sub_format = USER_OPTIONS.sub_format;
   }
   if (!selectedQuality) {
     localStorage.setItem("VIDEO_QUALITY", "112");
@@ -114,24 +119,24 @@ CHANGE SUB_LANGUAGE to:
     const qualities = options || [
       {
         label: "4K",
-        value: 120,
+        value: 120
       },
       {
         label: "4K",
-        value: 112,
+        value: 112
       },
       {
         label: "4K",
-        value: 64,
+        value: 64
       },
       {
         label: "4K",
-        value: 32,
+        value: 32
       },
       {
         label: "4K",
-        value: 16,
-      },
+        value: 16
+      }
     ];
     let el = "";
     qualities.forEach((item) => {
@@ -220,7 +225,7 @@ CHANGE SUB_LANGUAGE to:
           .filter((item) => !!item.video_resource.url)
           .map((item) => ({
             value: item.video_resource.quality,
-            label: item.stream_info.desc_words,
+            label: item.stream_info.desc_words
           }));
         const options = createQualityOptions(qualities);
         document.getElementById("changeQuality").innerHTML = options;
@@ -309,7 +314,7 @@ CHANGE SUB_LANGUAGE to:
         );
 
         const blob = new Blob([rText], {
-          type: "text/plain",
+          type: "text/plain"
         });
         makeAnkerTag("ass", title, epTitle, thisEp, blob);
       } else {
@@ -338,12 +343,12 @@ CHANGE SUB_LANGUAGE to:
           text += item.content + "\n\n";
         });
         blob = new Blob([text], {
-          type: "text/plain",
+          type: "text/plain"
         });
       } else {
         // Generate JSON format
         blob = new Blob([JSON.stringify(d)], {
-          type: "application/json",
+          type: "application/json"
         });
       }
       //Create <a> tag
@@ -512,7 +517,7 @@ CHANGE SUB_LANGUAGE to:
     cond1 = cond2 = false;
     let ep_obj = {
       id: [],
-      title: [],
+      title: []
     };
     const ep_list = document.getElementsByClassName("select-ep__panel")[0];
     const a_list = ep_list.getElementsByTagName("a");
