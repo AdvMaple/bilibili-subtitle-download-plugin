@@ -678,11 +678,17 @@ CHANGE SUB_LANGUAGE to:
   function ChangeLanguage(e) {
     localStorage.setItem("SUB_LANGUAGE", e.target.value);
     sub_language = e.target.value;
+
+    // Re-generate new links
+    downloadThisEp();
   }
 
   function changeSubFormat(e) {
     localStorage.setItem("SUB_FORMAT", e.target.value);
     sub_format = e.target.value;
+
+    // Re-generate new links
+    downloadThisEp();
   }
 
   function changeQuality(e) {
@@ -693,6 +699,9 @@ CHANGE SUB_LANGUAGE to:
 
     localStorage.setItem("VIDEO_CODEC", values[1]);
     selectedCodec = e.target.value;
+
+    // Re-generate new links
+    downloadThisEp();
   }
 
   function getEpTitle(title) {
