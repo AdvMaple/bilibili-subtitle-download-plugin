@@ -642,12 +642,18 @@ CHANGE SUB_LANGUAGE to:
   GM_addStyle(`
 
   #downloadBiliintScript {
-      position: fixed;
-      bottom: 6rem;
-      left: 1rem;
-      margin: 3px;
-      z-index: 9999;
-      opacity: 0.97;
+    position: fixed;
+    bottom: 6rem;
+    left: 1rem;
+    margin: 3px;
+    z-index: 9999;
+    opacity: 0.97;
+    background: black;
+    padding: 16px;
+  }
+
+  #down-this {
+    background: white;
   }
 
   .linkContainer{
