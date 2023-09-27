@@ -160,12 +160,15 @@ CHANGE SUB_LANGUAGE to:
 
   function createSubFormatOptions() {
     return `
-      <option value="json" ${
-        sub_format === "json" ? "selected" : ""
-      }> JSON </option>
+      <option value="ass" ${
+        sub_format === "ass" ? "selected" : ""
+      }> ASS </option>
       <option value="srt" ${
         sub_format === "srt" ? "selected" : ""
       }> SRT </option>
+      <option value="json" ${
+        sub_format === "json" ? "selected" : ""
+      }> JSON </option>
       <option value="vtt" ${
         sub_format === "vtt" ? "selected" : ""
       }> Web VTT </option>`;
@@ -375,6 +378,7 @@ CHANGE SUB_LANGUAGE to:
         if (sub_format === "vtt") {
           text += `WEBVTT\nKind: captions\nLanguage: ${sub_language}\n\n`;
         }
+
         // Map body
         d.body.forEach((item, index) => {
           // Get start time
@@ -388,15 +392,17 @@ CHANGE SUB_LANGUAGE to:
           // Content
           text += item.content + "\n\n";
         });
+
         blob = new Blob([text], {
           type: "text/plain"
         });
       } else {
-        // Generate JSON format
+        // Generate ASS/JSON format
         blob = new Blob([JSON.stringify(d)], {
           type: "application/json"
         });
       }
+
       //Create <a> tag
       makeAnkerTag(sub_format, title, epTitle, thisEp, blob);
     }
@@ -411,13 +417,28 @@ CHANGE SUB_LANGUAGE to:
       alert("Server is returning wrong => contact dev :)");
     } else {
       const { data } = JSON.parse(rText);
-      if (data.subtitles === null)
-        alert("There has been some problems, please contract dev");
+      if (data.subtitles === null || data.video_subtitle === null) {
+        alert("There has been some problems, please contact dev");
+      }
+
       //Take data in response
+      let subtitleData = [];
+      if (sub_format === "srt") {
+        // SRT only
+        subtitleData = data.video_subtitle || [];
+      } else {
+        // ASS subtitle & others
+        subtitleData = data.subtitles || [];
+      }
+
       //Get number in subtitle files in data
-      for (let i = 0; i < data.subtitles.length; i++) {
-        if (data.subtitles[i]["lang_key"] == sub_language) {
-          const ep_sub_url = data.subtitles[i].url;
+      for (let i = 0; i < subtitleData.length; i++) {
+        if (subtitleData[i]["lang_key"] == sub_language) {
+          const ep_sub_url =
+            sub_format === "srt"
+              ? subtitleData[i].srt.url
+              : subtitleData[i].url;
+
           procressSubtitleArrayFromServer(
             ep_sub_url,
             ep_id,
