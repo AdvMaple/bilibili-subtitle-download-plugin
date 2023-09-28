@@ -207,19 +207,6 @@ CHANGE SUB_LANGUAGE to:
   }
 
   /**
-   * Convert second to time stamp
-   * @param {*} sec
-   */
-  function secToTimer(sec) {
-    let o = new Date(0);
-    let p = new Date(sec * 1000);
-    return new Date(p.getTime() - o.getTime())
-      .toISOString()
-      .split("T")[1]
-      .split("Z")[0];
-  }
-
-  /**
    * Create video link and append to element
    * @param {*} url
    * @param {*} title
@@ -271,46 +258,6 @@ CHANGE SUB_LANGUAGE to:
 
   zNode.setAttribute("id", "downloadBiliintScript");
   document.body.appendChild(zNode);
-
-  function _generateQualities(epId) {
-    fetch(
-      `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${epId}&device=wap&platform=web&qn=64&tf=0&type=0`,
-      { credentials: "include" }
-    )
-      .then((r) => r.json())
-      .then(({ data }) => {
-        const d = data.playurl;
-        const qualities = d.video
-          .filter((item) => !!item.video_resource.url)
-          .map((item) => ({
-            codec_id: item.video_resource.codec_id,
-            id: item.video_resource.quality,
-            label: item.stream_info.desc_words
-          }));
-
-        const options = createQualityOptions(qualities);
-        document.getElementById("changeQuality").innerHTML = options;
-      });
-  }
-
-  if (!thisEpId) {
-    fetch(
-      `https://api.bilibili.tv/intl/gateway/web/v2/ogv/play/episodes?platform=web&season_id=${seriesId}`,
-      { credentials: "include" }
-    )
-      .then((r) => r.json())
-      .then(({ data }) => {
-        if (data?.sections?.length > 0) {
-          const eps = data?.sections[0].episodes;
-          if (eps.length > 0) {
-            const epId = eps[0].episode_id;
-            _generateQualities(epId);
-          }
-        }
-      });
-  } else {
-    _generateQualities(thisEpId);
-  }
 
   document
     .getElementById("down-this")
@@ -367,8 +314,22 @@ CHANGE SUB_LANGUAGE to:
       const d = JSON.parse(rText);
       let blob;
       let text = "";
+
       // Generate SRT and Web VTT format
       if (sub_format === "vtt" || sub_format === "srt") {
+        /**
+         * Convert second to time stamp
+         * @param {*} sec
+         */
+        const _secToTimer = (sec) => {
+          let o = new Date(0);
+          let p = new Date(sec * 1000);
+          return new Date(p.getTime() - o.getTime())
+            .toISOString()
+            .split("T")[1]
+            .split("Z")[0];
+        };
+
         if (sub_format === "vtt") {
           text += `WEBVTT\nKind: captions\nLanguage: ${sub_language}\n\n`;
         }
@@ -376,9 +337,9 @@ CHANGE SUB_LANGUAGE to:
         // Map body
         d.body.forEach((item, index) => {
           // Get start time
-          const from = secToTimer(item.from !== undefined ? item.from : 0);
+          const from = _secToTimer(item.from !== undefined ? item.from : 0);
           // Get end time
-          const to = secToTimer(item.to);
+          const to = _secToTimer(item.to);
           // Line
           text += index + 1 + "\n";
           // Time
@@ -461,6 +422,46 @@ CHANGE SUB_LANGUAGE to:
         }
       }
     }
+  }
+
+  function generateQualities(epId) {
+    fetch(
+      `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${epId}&device=wap&platform=web&qn=64&tf=0&type=0`,
+      { credentials: "include" }
+    )
+      .then((r) => r.json())
+      .then(({ data }) => {
+        const d = data.playurl;
+        const qualities = d.video
+          .filter((item) => !!item.video_resource.url)
+          .map((item) => ({
+            codec_id: item.video_resource.codec_id,
+            id: item.video_resource.quality,
+            label: item.stream_info.desc_words
+          }));
+
+        const options = createQualityOptions(qualities);
+        document.getElementById("changeQuality").innerHTML = options;
+      });
+  }
+
+  if (!thisEpId) {
+    fetch(
+      `https://api.bilibili.tv/intl/gateway/web/v2/ogv/play/episodes?platform=web&season_id=${seriesId}`,
+      { credentials: "include" }
+    )
+      .then((r) => r.json())
+      .then(({ data }) => {
+        if (data?.sections?.length > 0) {
+          const eps = data?.sections[0].episodes;
+          if (eps.length > 0) {
+            const epId = eps[0].episode_id;
+            generateQualities(epId);
+          }
+        }
+      });
+  } else {
+    generateQualities(thisEpId);
   }
 
   /**
