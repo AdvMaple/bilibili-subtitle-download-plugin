@@ -31,6 +31,15 @@ CHANGE SUB_LANGUAGE to:
     video_codec: 12
   };
 
+  const SUB_LANGUAGES = [
+    { id: "vi", label: "Tiếng Việt" },
+    { id: "en", label: "English" },
+    { id: "th", label: "ภาษาไทย" },
+    { id: "id", label: "Bahasa Indonesia" },
+    { id: "ms", label: "Bahasa Melayu" },
+    { id: "zh-Hans", label: "中文（简体）" }
+  ];
+
   const VIDEO_CODECS = [
     {
       id: 7,
@@ -120,9 +129,10 @@ CHANGE SUB_LANGUAGE to:
 
   const pathnameArr = location.pathname.split("/");
   let appLang = pathnameArr[1];
-  if (!["en", "th"].includes(appLang)) {
+  if (!Object.keys(APP_LANGUAGES).includes(appLang)) {
     appLang = "en";
   }
+
   let thisEpId, seriesId;
   if (pathnameArr.length === 5) {
     thisEpId = pathnameArr[pathnameArr.length - 1];
@@ -132,25 +142,12 @@ CHANGE SUB_LANGUAGE to:
   }
 
   function createSelectOption() {
-    return `
-      <option value="vi" ${
-        sub_language === "vi" ? "selected" : ""
-      }> Tiếng Việt </option>
-      <option value="id" ${
-        sub_language === "id" ? "selected" : ""
-      }> Bahasa Indonesia </option>
-      <option value="en" ${
-        sub_language === "en" ? "selected" : ""
-      }> English </option>
-      <option value="zh-Hans" ${
-        sub_language === "zh-Hans" ? "selected" : ""
-      }> 中文（简体） </option>
-      <option value="th" ${
-        sub_language === "th" ? "selected" : ""
-      }> ภาษาไทย </option>
-      <option value="ms" ${
-        sub_language === "ms" ? "selected" : ""
-      }> Bahasa Melayu </option>`;
+    return `${SUB_LANGUAGES.map(
+      (item) =>
+        `<option value="${item.id}" ${
+          sub_language === item.id ? "selected" : ""
+        }> ${item.label} </option>`
+    )}`;
   }
 
   function createSubFormatOptions() {
