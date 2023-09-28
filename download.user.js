@@ -220,15 +220,13 @@ CHANGE SUB_LANGUAGE to:
   }
 
   /**
-   * Create vodeo link and append to element
+   * Create video link and append to element
    * @param {*} url
    * @param {*} title
    */
   function createVideoElement(url, title) {
     const a = document.createElement("a");
-    // a.textContent = ` [${maxVideoQuality}]${title} `;
     a.textContent = title;
-    // a.textContent = `VID `;
     a.href = url;
     a.download = "episode_url";
     a.type = "video/mp4";
@@ -247,9 +245,11 @@ CHANGE SUB_LANGUAGE to:
     <select id="changeLanguage" class="subtitleSelect" name="lang">
       ${createSelectOption()}
     </select>
+
     <select id="changeSubFormat" class="subtitleSelect" name="lang-format">
       ${createSubFormatOptions()}
     </select>
+
     <select id="changeQuality" class="subtitleSelect" name="quality">
 
     </select>
@@ -257,14 +257,17 @@ CHANGE SUB_LANGUAGE to:
     <div class="linkContainer" id="jsonSubtitleList">${
       APP_LANGUAGES[appLang].subtitle
     }\&nbsp;:\&nbsp;</div>
+
     <div class="linkContainer" id="videoList" >${
       APP_LANGUAGES[appLang].video
     }\&nbsp;:\&nbsp;</div>
+
     <div class="linkContainer" id="audioList" >${
       APP_LANGUAGES[appLang].audio
     }\&nbsp;:\&nbsp;</div>
+
     <div id="snackbar"></div>
-    `;
+  `;
 
   zNode.setAttribute("id", "downloadBiliintScript");
   document.body.appendChild(zNode);
@@ -334,23 +337,21 @@ CHANGE SUB_LANGUAGE to:
     return true;
   };
 
-  const isAssSubtitleFile = (str) => {
-    return str.includes("[V4+ Styles]");
-  };
-
-  const procressSubtitleArrayFromServer = async (
+  const processSubtitleArrayFromServer = async (
     ep_sub_url,
     ep_id,
     title,
     epTitle,
     thisEp
   ) => {
+    const _isAssSubtitleFile = (str) => str.includes("[V4+ Styles]");
+
     const r = await fetch(ep_sub_url);
     const rText = await r.text();
 
     let dataFormatName = "unknown format";
     if (!isJsonString(rText)) {
-      if (isAssSubtitleFile(rText)) {
+      if (_isAssSubtitleFile(rText)) {
         dataFormatName = "ass";
 
         const blob = new Blob([rText], {
@@ -406,10 +407,24 @@ CHANGE SUB_LANGUAGE to:
     );
   };
 
+  const makeAnkerTag = (sub_format, title, epTitle, thisEp, blob) => {
+    const _getEpTitle = (str) => (str === null ? "1" : str);
+
+    let a = document.createElement("a");
+    a.download = !epTitle
+      ? `${title}-${sub_language}.${sub_format}`
+      : `${title}-ep-${epTitle}-${sub_language}.${sub_format}`;
+    a.textContent = thisEp ? title : `${_getEpTitle(epTitle)} `;
+    a.href = URL.createObjectURL(blob);
+    document.getElementById("jsonSubtitleList").appendChild(a);
+  };
+
   async function generateSubtitle(ep_id, title, epTitle, thisEp) {
     const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=vi_VN&platform=web&episode_id=${ep_id}&spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all`;
+
     const r = await fetch(FETCH_URL, { credentials: "include" });
     const rText = await r.text();
+
     if (!isJsonString(rText)) {
       alert("Server is returning wrong => contact dev :)");
     } else {
@@ -436,7 +451,7 @@ CHANGE SUB_LANGUAGE to:
               ? subtitleData[i].url
               : subtitleData[i].srt.url;
 
-          procressSubtitleArrayFromServer(
+          processSubtitleArrayFromServer(
             ep_sub_url,
             ep_id,
             title,
@@ -447,17 +462,6 @@ CHANGE SUB_LANGUAGE to:
       }
     }
   }
-
-  const makeAnkerTag = (sub_format, title, epTitle, thisEp, blob) => {
-    let a = document.createElement("a");
-    a.download = !epTitle
-      ? `${title}-${sub_language}.${sub_format}`
-      : `${title}-ep-${epTitle}-${sub_language}.${sub_format}`;
-    a.textContent = thisEp ? title : `${getEpTitle(epTitle)} `;
-    a.href = URL.createObjectURL(blob);
-    document.getElementById("jsonSubtitleList").appendChild(a);
-    // <a download="{animeName} ep {title}.json" href={URL.createObjectURL(blob)}> {title}</a>
-  };
 
   /**
    * Genearate video ep
@@ -512,7 +516,6 @@ CHANGE SUB_LANGUAGE to:
         }
 
         //AUDIO LOOP
-
         for (let i = 0; i < d["audio_resource"].length; i++) {
           const audio_url = d["audio_resource"][i].url;
           if (audio_url !== "") {
@@ -536,13 +539,15 @@ CHANGE SUB_LANGUAGE to:
 
   function generateCurrentEpisodeElement() {
     const title = document.title;
-    let thisEpId;
     const pathnameArr = location.pathname.split("/");
+
+    let thisEpId;
     if (pathnameArr.length === 5) {
       thisEpId = pathnameArr[pathnameArr.length - 1];
     } else {
       alert("Please choose an episode first to have episode ID");
     }
+
     if (thisEpId) {
       generateSubtitle(thisEpId, title, null, true);
       generateEpElement(thisEpId, title);
@@ -608,18 +613,12 @@ CHANGE SUB_LANGUAGE to:
     downloadThisEp();
   }
 
-  function getEpTitle(title) {
-    if (title === null) {
-      return "1";
-    }
-    return title;
-  }
-
   let toastTimeout;
   function showToast(message) {
     const x = document.getElementById("snackbar");
     x.className = "show";
     x.innerText = message;
+
     if (toastTimeout) {
       toastTimeout = clearTimeout(toastTimeout);
     }
@@ -632,125 +631,125 @@ CHANGE SUB_LANGUAGE to:
   // Style newly added button
   GM_addStyle(`
 
-  #downloadBiliintScript {
-    position: fixed;
-    bottom: 6rem;
-    left: 1rem;
-    margin: 3px;
-    z-index: 9999;
-    opacity: 0.97;
-    background: black;
-    padding: 16px;
-  }
+    #downloadBiliintScript {
+      position: fixed;
+      bottom: 6rem;
+      left: 1rem;
+      margin: 3px;
+      z-index: 9999;
+      opacity: 0.97;
+      background: black;
+      padding: 16px;
+    }
 
-  #down-this {
-    background: white;
-  }
+    #down-this {
+      background: white;
+    }
 
-  .linkContainer{
-    color: black;
-    background: white;
-    opacity: 0.97;
-    margin: 2px;
-    border-radius: 20px;
-    padding: 4px;
-    font-size: 15px
-  }
-
-  .btn {
-    cursor: pointer;
-    padding: 3px;
-    margin-bottom: 3px;
-    opacity:0.97;
-    border-radius: 20px;
-    padding: 8px;
-  }
-
-  .btn:hover {
-    background-color: #6b9f25;
-    color: white;
-  }
-
-  #BtnContainer{
-    margin-top: 3px;
-    margin-bottom: 6px;
-    opacity: 0.97;
-  }
-
-  #mySortBtn {
-    cursor: pointer;
-    padding: 3px;
-    border-radius:20px;
-    width: 100%;
-    background-color: #23427f;
-    color: white;
-    opacity: 0.99;
-  }
-  #mySortBtn:hover {
-    background-color: #38548b;
-    color: #d3d9e5;
-  }
-
-  #downloadBiliintScript a {
-      color: #4c93ff;
+    .linkContainer{
+      color: black;
       background: white;
       opacity: 0.97;
-  }
+      margin: 2px;
+      border-radius: 20px;
+      padding: 4px;
+      font-size: 15px
+    }
 
-  #downloadBiliintScript a:hover {
-    color: #4078cb;
-    background: white;
-    opacity: 0.97;
-  }
+    .btn {
+      cursor: pointer;
+      padding: 3px;
+      margin-bottom: 3px;
+      opacity:0.97;
+      border-radius: 20px;
+      padding: 8px;
+    }
 
-  .subtitleSelect {
-    margin-top: 3px;
-    margin-bottom: 6px;
-    border-radius: 20px;
-    padding: 8px;
-    background: white;
-    opacity: 0.97;
-  }
-  #snackbar {
-  visibility: hidden;
-  min-width: 250px;
-  margin-left: -125px;
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  border-radius: 2px;
-  padding: 16px;
-  position: fixed;
-  z-index: 1;
-  left: 50%;
-  bottom: 30px;
-  font-size: 17px;
-}
+    .btn:hover {
+      background-color: #6b9f25;
+      color: white;
+    }
 
-#snackbar.show {
-  visibility: visible;
-  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
-  animation: fadein 0.5s, fadeout 0.5s 2.5s;
-}
+    #BtnContainer{
+      margin-top: 3px;
+      margin-bottom: 6px;
+      opacity: 0.97;
+    }
 
-@-webkit-keyframes fadein {
-  from {bottom: 0; opacity: 0;}
-  to {bottom: 30px; opacity: 1;}
-}
+    #mySortBtn {
+      cursor: pointer;
+      padding: 3px;
+      border-radius:20px;
+      width: 100%;
+      background-color: #23427f;
+      color: white;
+      opacity: 0.99;
+    }
+    #mySortBtn:hover {
+      background-color: #38548b;
+      color: #d3d9e5;
+    }
 
-@keyframes fadein {
-  from {bottom: 0; opacity: 0;}
-  to {bottom: 30px; opacity: 1;}
-}
+    #downloadBiliintScript a {
+        color: #4c93ff;
+        background: white;
+        opacity: 0.97;
+    }
 
-@-webkit-keyframes fadeout {
-  from {bottom: 30px; opacity: 1;}
-  to {bottom: 0; opacity: 0;}
-}
+    #downloadBiliintScript a:hover {
+      color: #4078cb;
+      background: white;
+      opacity: 0.97;
+    }
 
-@keyframes fadeout {
-  from {bottom: 30px; opacity: 1;}
-  to {bottom: 0; opacity: 0;}
-}
+    .subtitleSelect {
+      margin-top: 3px;
+      margin-bottom: 6px;
+      border-radius: 20px;
+      padding: 8px;
+      background: white;
+      opacity: 0.97;
+    }
+    #snackbar {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 17px;
+    }
+
+    #snackbar.show {
+      visibility: visible;
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    }
+
+    @-webkit-keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0;}
+      to {bottom: 30px; opacity: 1;}
+    }
+
+    @-webkit-keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
+
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1;}
+      to {bottom: 0; opacity: 0;}
+    }
 `);
 })();
