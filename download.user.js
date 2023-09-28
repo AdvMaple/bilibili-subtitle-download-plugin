@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         bili international download
-// @version      0.5.12
-// @description  download json subtitle from biliintl
+// @name         Bilibili international subtitle downloader
+// @version      0.6
+// @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
 // @include      /\:\/\/.*.bili.*\/play\/.*$/
@@ -11,16 +11,6 @@
 // @require      http://code.jquery.com/jquery-3.6.0.min.js
 
 // ==/UserScript==
-
-/*
-CHANGE SUB_LANGUAGE to:
-"en" for English
-"th" สำหรับภาษาไทย
-"zh-Hans" 为简体中文
-"vi" cho người việt nam
-"id" untuk Bahasa Indonesia
-"ms" untuk Bahasa Melayu
-*/
 
 // Script start here
 (function () {
@@ -39,6 +29,8 @@ CHANGE SUB_LANGUAGE to:
     { id: "ms", label: "Bahasa Melayu" },
     { id: "zh-Hans", label: "中文（简体）" }
   ];
+
+  const SUB_FORMATS = ["ass", "srt", "vtt", "json"];
 
   const VIDEO_CODECS = [
     {
@@ -151,20 +143,12 @@ CHANGE SUB_LANGUAGE to:
   }
 
   function createSubFormatOptions() {
-    return `
-      <option value="ass" ${
-        sub_format === "ass" ? "selected" : ""
-      }> ASS </option>
-      <option value="srt" ${
-        sub_format === "srt" ? "selected" : ""
-      }> SRT </option>
-      <option value="vtt" ${
-        sub_format === "vtt" ? "selected" : ""
-      }> Web VTT </option>
-      <option value="json" ${
-        sub_format === "json" ? "selected" : ""
-      }> JSON </option>
-    `;
+    return `${SUB_FORMATS.map(
+      (value) =>
+        `<option value="${value}" ${
+          sub_format === value ? "selected" : ""
+        }> ${value.toUpperCase()} </option>`
+    )}`;
   }
 
   function createQualityOptions(options) {
