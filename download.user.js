@@ -25,7 +25,7 @@ CHANGE SUB_LANGUAGE to:
 // Script start here
 (function () {
   const DEFAULT_USER_OPTIONS = {
-    sub_language: "vi",
+    sub_language: "en",
     sub_format: "srt",
     video_quality: 112,
     video_codec: 12
@@ -77,7 +77,7 @@ CHANGE SUB_LANGUAGE to:
     }
   ];
 
-  const LANGS = {
+  const APP_LANGUAGES = {
     en: {
       gen_this_link: "Generate Links for this EP",
       gen_links: "Generate Links",
@@ -93,9 +93,6 @@ CHANGE SUB_LANGUAGE to:
       audio: "เสียง"
     }
   };
-
-  // Create download sub button
-  let sorted = 0;
 
   let sub_language = localStorage.getItem("SUB_LANGUAGE");
   if (!sub_language) {
@@ -134,8 +131,6 @@ CHANGE SUB_LANGUAGE to:
     seriesId = pathnameArr[pathnameArr.length - 1];
   }
 
-  console.log(sub_language);
-  console.log(sub_format);
   function createSelectOption() {
     return `
       <option value="vi" ${
@@ -242,15 +237,12 @@ CHANGE SUB_LANGUAGE to:
   }
 
   let zNode = document.createElement("div");
-
-  // <button id="subtitleDownload" class="btn" type="button"> ${LANGS[appLang].gen_links} </button>
   zNode.innerHTML = `
     <div id="gen-sigle">
       <button id="down-this" class="btn" type="button"> ${
-        LANGS[appLang].gen_this_link
+        APP_LANGUAGES[appLang].gen_this_link
       } </button>
     </div>
-
 
     <select id="changeLanguage" class="subtitleSelect" name="lang">
       ${createSelectOption()}
@@ -263,13 +255,13 @@ CHANGE SUB_LANGUAGE to:
     </select>
 
     <div class="linkContainer" id="jsonSubtitleList">${
-      LANGS[appLang].subtitle
+      APP_LANGUAGES[appLang].subtitle
     }\&nbsp;:\&nbsp;</div>
     <div class="linkContainer" id="videoList" >${
-      LANGS[appLang].video
+      APP_LANGUAGES[appLang].video
     }\&nbsp;:\&nbsp;</div>
     <div class="linkContainer" id="audioList" >${
-      LANGS[appLang].audio
+      APP_LANGUAGES[appLang].audio
     }\&nbsp;:\&nbsp;</div>
     <div id="snackbar"></div>
     `;
@@ -323,7 +315,7 @@ CHANGE SUB_LANGUAGE to:
 
   document
     .getElementById("changeLanguage")
-    .addEventListener("change", ChangeLanguage, false);
+    .addEventListener("change", changeLanguage, false);
 
   document
     .getElementById("changeSubFormat")
@@ -333,14 +325,14 @@ CHANGE SUB_LANGUAGE to:
     .getElementById("changeQuality")
     .addEventListener("change", changeQuality, false);
 
-  function isJsonString(str) {
+  const isJsonString = (str) => {
     try {
       JSON.parse(str);
     } catch (e) {
       return false;
     }
     return true;
-  }
+  };
 
   const isAssSubtitleFile = (str) => {
     return str.includes("[V4+ Styles]");
@@ -354,7 +346,6 @@ CHANGE SUB_LANGUAGE to:
     thisEp
   ) => {
     const r = await fetch(ep_sub_url);
-    console.log(r);
     const rText = await r.text();
 
     let dataFormatName = "unknown format";
@@ -420,7 +411,6 @@ CHANGE SUB_LANGUAGE to:
     const r = await fetch(FETCH_URL, { credentials: "include" });
     const rText = await r.text();
     if (!isJsonString(rText)) {
-      console.log(rText);
       alert("Server is returning wrong => contact dev :)");
     } else {
       const { data } = JSON.parse(rText);
@@ -573,72 +563,13 @@ CHANGE SUB_LANGUAGE to:
   function resetContent() {
     document.getElementById(
       "jsonSubtitleList"
-    ).innerHTML = `${LANGS[appLang].subtitle}\&nbsp;:\&nbsp;`;
+    ).innerHTML = `${APP_LANGUAGES[appLang].subtitle}\&nbsp;:\&nbsp;`;
     document.getElementById(
       "videoList"
-    ).innerHTML = `${LANGS[appLang].video}\&nbsp;:\&nbsp;`;
+    ).innerHTML = `${APP_LANGUAGES[appLang].video}\&nbsp;:\&nbsp;`;
     document.getElementById(
       "audioList"
-    ).innerHTML = `${LANGS[appLang].audio}\&nbsp;:\&nbsp;`;
-  }
-
-  //When downloadSubtitle is click:
-  function SubtitleDownloadAction(zEvent) {
-    // Reset
-    resetContent();
-    //Get series id
-    let id = window.location.href.match(/\d+/g); // Get all number in url
-    let div_content =
-      document.getElementsByClassName("video-info__title")[0].innerText;
-    let series_id = id[0];
-    // var ep_id = id[1]; //There can be episode id in the title
-    cond1 = cond2 = false;
-    let ep_obj = {
-      id: [],
-      title: []
-    };
-    const ep_list = document.getElementsByClassName("select-ep__panel")[0];
-    const a_list = ep_list.getElementsByTagName("a");
-    const title_list = ep_list.getElementsByClassName(
-      "across-card__info_title"
-    );
-
-    // Get ep_id
-    for (let i = 0; i < a_list.length; i++) {
-      ep_obj.id.push(a_list[i].pathname.match(/\d+/g)[1]);
-    }
-
-    for (let i = 0; i < title_list.length; i++) {
-      let text = title_list[i].innerText.match(/^([\w\-]+)/);
-      try {
-        ep_obj.title.push(text[0]);
-      } catch (error) {
-        ep_obj.title.push(i + 1);
-      }
-    }
-    // console.log(ep_obj.title);
-
-    ep_obj.id.map((ep_id, index) => {
-      // console.log(ep_id, ep_obj.title[index]);
-      // Get list of subtitle in episode
-      generateSubtitle(ep_id, div_content, ep_obj.title[index]);
-      //Get list of video and audio in episode
-      generateEpElement(ep_id, ep_obj.title[index]);
-    });
-
-    if (sorted == 0) {
-      console.log(sorted == 0);
-      sorted = 1;
-      var zNode = document.createElement("div");
-      zNode.setAttribute("id", "BtnContainer");
-      zNode.innerHTML =
-        '<button id="mySortBtn" type="button" style=""> Sort </button>';
-
-      document.getElementById("downloadBiliintScript").appendChild(zNode);
-      document
-        .getElementById("mySortBtn")
-        .addEventListener("click", ButtonSortClick, false);
-    }
+    ).innerHTML = `${APP_LANGUAGES[appLang].audio}\&nbsp;:\&nbsp;`;
   }
 
   function downloadThisEp(e) {
@@ -648,41 +579,7 @@ CHANGE SUB_LANGUAGE to:
     generateCurrentEpisodeElement();
   }
 
-  function ButtonSortClick(zEvent) {
-    var sort_by_num = function (a, b) {
-      return (
-        Number(a.innerText.match(/\d+/g)[0]) -
-        Number(b.innerText.match(/\d+/g)[0])
-      );
-    };
-
-    // var sort_by_num_with_extra_character = function (a, b) {
-    //   a.innerText = a.match(/(?<=\])(.*?)(?= )/gm);
-    //   b.innerText = b.match(/(?<=\])(.*?)(?= )/gm);
-    //   return a.innerText - b.innerText;
-    // };
-
-    var list = $("#jsonSubtitleList > a").get();
-    // console.log(list);
-    list.sort(sort_by_num);
-    for (var i = 0; i < list.length; i++) {
-      list[i].parentNode.appendChild(list[i]);
-    }
-
-    list = $("#videoList > a").get();
-    list.sort(sort_by_num);
-    for (var i = 0; i < list.length; i++) {
-      list[i].parentNode.appendChild(list[i]);
-    }
-
-    list = $("#audioList > a").get();
-    list.sort(sort_by_num);
-    for (var i = 0; i < list.length; i++) {
-      list[i].parentNode.appendChild(list[i]);
-    }
-  }
-
-  function ChangeLanguage(e) {
+  function changeLanguage(e) {
     localStorage.setItem("SUB_LANGUAGE", e.target.value);
     sub_language = e.target.value;
 
@@ -712,7 +609,6 @@ CHANGE SUB_LANGUAGE to:
   }
 
   function getEpTitle(title) {
-    console.log(title);
     if (title === null) {
       return "1";
     }
@@ -732,8 +628,6 @@ CHANGE SUB_LANGUAGE to:
       x.className = x.className.replace("show", "");
     }, 3000);
   }
-
-  console.log("From AdvMaple");
 
   // Style newly added button
   GM_addStyle(`
