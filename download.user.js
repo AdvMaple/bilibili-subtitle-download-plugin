@@ -644,23 +644,27 @@ CHANGE SUB_LANGUAGE to:
     }
 
     #down-this {
-      background: white;
+      background: #4c93ff;
+      margin-bottom: 16px;
+
+      color: white;
+      font-weight: 700;
     }
 
-    .linkContainer{
+    .linkContainer {
+      margin-top: 16px;
+
       color: black;
       background: white;
       opacity: 0.97;
-      margin: 2px;
       border-radius: 20px;
-      padding: 4px;
+      padding: 8px;
       font-size: 15px
     }
 
     .btn {
       cursor: pointer;
       padding: 3px;
-      margin-bottom: 3px;
       opacity:0.97;
       border-radius: 20px;
       padding: 8px;
@@ -704,13 +708,15 @@ CHANGE SUB_LANGUAGE to:
     }
 
     .subtitleSelect {
-      margin-top: 3px;
-      margin-bottom: 6px;
       border-radius: 20px;
       padding: 8px;
       background: white;
       opacity: 0.97;
     }
+    :not(.subtitleSelect:last-child) {
+      margin-right: 8px;
+    }
+
     #snackbar {
       visibility: hidden;
       min-width: 250px;
