@@ -166,12 +166,13 @@ CHANGE SUB_LANGUAGE to:
       <option value="srt" ${
         sub_format === "srt" ? "selected" : ""
       }> SRT </option>
+      <option value="vtt" ${
+        sub_format === "vtt" ? "selected" : ""
+      }> Web VTT </option>
       <option value="json" ${
         sub_format === "json" ? "selected" : ""
       }> JSON </option>
-      <option value="vtt" ${
-        sub_format === "vtt" ? "selected" : ""
-      }> Web VTT </option>`;
+    `;
   }
 
   function createQualityOptions(options) {
@@ -355,12 +356,11 @@ CHANGE SUB_LANGUAGE to:
     const r = await fetch(ep_sub_url);
     console.log(r);
     const rText = await r.text();
+
+    let dataFormatName = "unknown format";
     if (!isJsonString(rText)) {
       if (isAssSubtitleFile(rText)) {
-        // if mismatch the setting and the download file => show toast
-        showToast(
-          "The server is returning ass file. The generated link is .ass file"
-        );
+        dataFormatName = "ass";
 
         const blob = new Blob([rText], {
           type: "text/plain"
@@ -370,6 +370,8 @@ CHANGE SUB_LANGUAGE to:
         alert("Server is returning wrong => contact dev :)");
       }
     } else {
+      dataFormatName = "json";
+
       const d = JSON.parse(rText);
       let blob;
       let text = "";
@@ -394,10 +396,10 @@ CHANGE SUB_LANGUAGE to:
         });
 
         blob = new Blob([text], {
-          type: "text/plain"
+          type: `text/${sub_format === "srt" ? "plain" : "vtt"}`
         });
       } else {
-        // Generate ASS/JSON format
+        // Generate JSON format
         blob = new Blob([JSON.stringify(d)], {
           type: "application/json"
         });
@@ -406,6 +408,11 @@ CHANGE SUB_LANGUAGE to:
       //Create <a> tag
       makeAnkerTag(sub_format, title, epTitle, thisEp, blob);
     }
+
+    // if mismatch the setting and the download file => show toast
+    showToast(
+      `The server is returning ${dataFormatName} file. The generated link is .${sub_format} file`
+    );
   };
 
   async function generateSubtitle(ep_id, title, epTitle, thisEp) {
@@ -423,21 +430,21 @@ CHANGE SUB_LANGUAGE to:
 
       //Take data in response
       let subtitleData = [];
-      if (sub_format === "srt") {
-        // SRT only
-        subtitleData = data.video_subtitle || [];
-      } else {
-        // ASS subtitle & others
+      if (sub_format === "ass") {
+        // ASS only
         subtitleData = data.subtitles || [];
+      } else {
+        // SRT & others
+        subtitleData = data.video_subtitle || [];
       }
 
       //Get number in subtitle files in data
       for (let i = 0; i < subtitleData.length; i++) {
         if (subtitleData[i]["lang_key"] == sub_language) {
           const ep_sub_url =
-            sub_format === "srt"
-              ? subtitleData[i].srt.url
-              : subtitleData[i].url;
+            sub_format === "ass"
+              ? subtitleData[i].url
+              : subtitleData[i].srt.url;
 
           procressSubtitleArrayFromServer(
             ep_sub_url,
@@ -712,11 +719,16 @@ CHANGE SUB_LANGUAGE to:
     return title;
   }
 
+  let toastTimeout;
   function showToast(message) {
     const x = document.getElementById("snackbar");
     x.className = "show";
     x.innerText = message;
-    setTimeout(function () {
+    if (toastTimeout) {
+      toastTimeout = clearTimeout(toastTimeout);
+    }
+
+    toastTimeout = setTimeout(function () {
       x.className = x.className.replace("show", "");
     }, 3000);
   }
