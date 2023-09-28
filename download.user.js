@@ -141,7 +141,7 @@ CHANGE SUB_LANGUAGE to:
     seriesId = pathnameArr[pathnameArr.length - 1];
   }
 
-  function createSelectOption() {
+  function createSubLanguageOptions() {
     return `${SUB_LANGUAGES.map(
       (item) =>
         `<option value="${item.id}" ${
@@ -227,7 +227,7 @@ CHANGE SUB_LANGUAGE to:
     </div>
 
     <select id="changeLanguage" class="subtitleSelect" name="lang">
-      ${createSelectOption()}
+      ${createSubLanguageOptions()}
     </select>
 
     <select id="changeSubFormat" class="subtitleSelect" name="lang-format">
