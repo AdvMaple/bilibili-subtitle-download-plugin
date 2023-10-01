@@ -1,14 +1,13 @@
 // ==UserScript==
 // @name         Bilibili international subtitle downloader
-// @version      0.7.1
+// @version      0.7.2
 // @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
 // @include      /\:\/\/.*.bili.*\/play\/.*$/
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
-// @updateURL    https://github.com/AdvMaple/biliint.com-bilibili.tv_subtitle_download_plugin/raw/main/download.user.js
+// @updateURL    https://github.com/AdvMaple/bilibili-subtitle-download-plugin/raw/feature/download.user.js
 // @grant        GM_addStyle
-// @require      http://code.jquery.com/jquery-3.6.0.min.js
 
 // ==/UserScript==
 
