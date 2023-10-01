@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Bilibili international subtitle downloader
-// @version      0.6
+// @version      0.7.1
 // @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
@@ -192,7 +192,7 @@
     const a = document.createElement("a");
     a.textContent = ep_title;
     a.href = ep_url;
-    a.download = "episode_url";
+    a.download = `${ep_title}.mp4`;
     a.type = "video/mp4";
 
     document.getElementById("videoList").appendChild(a);
@@ -519,8 +519,8 @@
     }
 
     if (epId > 0) {
-      generateSubtitle({ ep_id: epId, ep_title: epTitle });
-      generateEpElement({ ep_id: epId, ep_title: epTitle });
+      generateSubtitle({ ep_id: epId, ep_title: `${epTitle} [${epId}]` });
+      generateEpElement({ ep_id: epId, ep_title: `${epTitle} [${epId}]` });
     } else {
       const activeEp = document.body.querySelector(
         ".video-play .ep-section .ep-list .ep-item--active"
@@ -537,8 +537,8 @@
       }
 
       if (epId > 0) {
-        generateSubtitle({ ep_id: epId, ep_title: epTitle });
-        generateEpElement({ ep_id: epId, ep_title: epTitle });
+        generateSubtitle({ ep_id: epId, ep_title: `${epTitle} [${epId}]` });
+        generateEpElement({ ep_id: epId, ep_title: `${epTitle} [${epId}]` });
       } else {
         alert("Can't identify episode ID, please contact dev");
       }
@@ -617,9 +617,7 @@
 
     let customEpTitle;
     if (epNumber > 0) {
-      customEpTitle = `${seriesTitle} - E${`${epNumber}`}${
-        epName ? ` - ${epName}` : ""
-      }`;
+      customEpTitle = `E${`${epNumber}`}${epName ? ` - ${epName}` : ""}`;
     } else {
       // PV ep
       customEpTitle = `${seriesTitle} - ${epTitle}`;
