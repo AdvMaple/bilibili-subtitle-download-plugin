@@ -187,15 +187,11 @@
     return el;
   }
 
-  /**
-   * Create video link and append to element
-   * @param {*} url
-   * @param {*} title
-   */
-  function createVideoElement(url, title) {
+  // Create video link and append to element
+  function createVideoElement({ ep_url, ep_title }) {
     const a = document.createElement("a");
-    a.textContent = title;
-    a.href = url;
+    a.textContent = ep_title;
+    a.href = ep_url;
     a.download = "episode_url";
     a.type = "video/mp4";
 
@@ -265,13 +261,7 @@
     return true;
   };
 
-  const processSubtitleArrayFromServer = async (
-    ep_sub_url,
-    ep_id,
-    title,
-    epTitle,
-    thisEp
-  ) => {
+  const processSubtitleArrayFromServer = async ({ ep_title, ep_sub_url }) => {
     const _isAssSubtitleFile = (str) => str.includes("[V4+ Styles]");
 
     const r = await fetch(ep_sub_url);
@@ -282,10 +272,9 @@
       if (_isAssSubtitleFile(rText)) {
         dataFormatName = "ass";
 
-        const blob = new Blob([rText], {
-          type: "text/plain"
-        });
-        makeAnkerTag("ass", title, epTitle, thisEp, blob);
+        const blob = new Blob([rText], { type: "text/plain" });
+
+        createDownloadLink({ file_name: ep_title, blob });
       } else {
         alert("Server is returning wrong => contact dev :)");
       }
@@ -298,10 +287,7 @@
 
       // Generate SRT and Web VTT format
       if (sub_format === "vtt" || sub_format === "srt") {
-        /**
-         * Convert second to time stamp
-         * @param {*} sec
-         */
+        // Convert second to time stamp
         const _secToTimer = (sec) => {
           let o = new Date(0);
           let p = new Date(sec * 1000);
@@ -339,8 +325,8 @@
         });
       }
 
-      //Create <a> tag
-      makeAnkerTag(sub_format, title, epTitle, thisEp, blob);
+      // Create <a> tag
+      createDownloadLink({ file_name: ep_title, blob });
     }
 
     // if mismatch the setting and the download file => show toast
@@ -349,19 +335,17 @@
     );
   };
 
-  const makeAnkerTag = (sub_format, title, epTitle, thisEp, blob) => {
-    const _getEpTitle = (str) => (str === null ? "1" : str);
-
-    let a = document.createElement("a");
-    a.download = !epTitle
-      ? `${title}-${sub_language}.${sub_format}`
-      : `${title}-ep-${epTitle}-${sub_language}.${sub_format}`;
-    a.textContent = thisEp ? title : `${_getEpTitle(epTitle)} `;
+  // Create download link for subtitles
+  function createDownloadLink({ file_name, blob }) {
+    const a = document.createElement("a");
+    a.download = `${file_name}.${sub_language}.${sub_format}`;
+    a.textContent = `${file_name}`;
     a.href = URL.createObjectURL(blob);
-    document.getElementById("jsonSubtitleList").appendChild(a);
-  };
 
-  async function generateSubtitle(ep_id, title, epTitle, thisEp) {
+    document.getElementById("jsonSubtitleList").appendChild(a);
+  }
+
+  async function generateSubtitle({ ep_id, ep_title }) {
     const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=vi_VN&platform=web&episode_id=${ep_id}&spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all`;
 
     const r = await fetch(FETCH_URL, { credentials: "include" });
@@ -375,7 +359,7 @@
         alert("There has been some problems, please contact dev");
       }
 
-      //Take data in response
+      // Take data in response
       let subtitleData = [];
       if (sub_format === "ass") {
         // ASS only
@@ -385,7 +369,7 @@
         subtitleData = data.video_subtitle || [];
       }
 
-      //Get number in subtitle files in data
+      // Get number in subtitle files in data
       for (let i = 0; i < subtitleData.length; i++) {
         if (subtitleData[i]["lang_key"] == sub_language) {
           const ep_sub_url =
@@ -393,13 +377,7 @@
               ? subtitleData[i].url
               : subtitleData[i].srt.url;
 
-          processSubtitleArrayFromServer(
-            ep_sub_url,
-            ep_id,
-            title,
-            epTitle,
-            thisEp
-          );
+          processSubtitleArrayFromServer({ ep_title, ep_sub_url });
         }
       }
     }
@@ -445,23 +423,18 @@
     generateQualities(thisEpId);
   }
 
-  /**
-   * Genearate video ep
-   * @param {*} ep_id
-   * @param {string} title
-   */
-  function generateEpElement(ep_id, title) {
+  // Generate video & audio url of ep
+  function generateEpElement({ ep_id, ep_title }) {
     fetch(
       `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${ep_id}&device=wap&platform=web&qn=64&tf=0&type=0`,
       { credentials: "include" }
     )
       .then((r) => r.json())
       .then(({ data }) => {
-        const d = data.playurl;
-
         var maxVideoQuality = 0;
         var maxAudioQuality = 0;
-        let episode_url = "";
+
+        const d = data.playurl;
 
         const userSelectedQuality = Number(selectedQuality);
         const userSelectedCodec = Number(selectedCodec);
@@ -471,11 +444,13 @@
             item.video_resource.quality === userSelectedQuality &&
             item.video_resource.codec_id === userSelectedCodec
         );
+
         let runLoop = false;
         if (vidIndex > -1) {
           const videoUrl = d.video[vidIndex].video_resource.url;
+
           if (videoUrl) {
-            createVideoElement(videoUrl, `${title} `);
+            createVideoElement({ ep_url: videoUrl, ep_title });
           } else {
             runLoop = true;
           }
@@ -483,31 +458,31 @@
           runLoop = true;
         }
 
+        // VIDEO LOOP
         if (runLoop) {
-          //VIDEO LOOP
           for (let i = 0; i < d.video.length; i++) {
-            episode_url = d.video[i]["video_resource"].url;
-            if (episode_url !== "") {
+            const video_url = d.video[i]["video_resource"].url;
+
+            if (video_url !== "") {
               if (maxVideoQuality < d.video[i]["video_resource"].quality) {
                 maxVideoQuality = d.video[i]["video_resource"].quality;
 
-                createVideoElement(episode_url, `${title} `);
+                createVideoElement({ ep_url: video_url, ep_title });
               }
             }
           }
         }
 
-        //AUDIO LOOP
+        // AUDIO LOOP
         for (let i = 0; i < d["audio_resource"].length; i++) {
           const audio_url = d["audio_resource"][i].url;
+
           if (audio_url !== "") {
             if (maxAudioQuality < d["audio_resource"][i].quality) {
               maxAudioQuality = d["audio_resource"][i].quality;
 
-              var a = document.createElement("a");
-              a.textContent = `${title} `;
-              // a.textContent = `AUDIO`;
-              // a.textContent = ` [${maxAudioQuality}]${title}`;
+              const a = document.createElement("a");
+              a.textContent = `${ep_title} `;
               a.href = audio_url;
               a.download = "audio_url";
               a.type = "video/mp4";
@@ -520,34 +495,50 @@
   }
 
   function generateCurrentEpisodeElement() {
-    const title = document.title;
-    const pathnameArr = location.pathname.split("/");
+    const epTitle = getEpTitle();
+    let epId, seriesId;
 
-    let thisEpId;
+    const pathnameArr = location.pathname.split("/");
     if (pathnameArr.length === 5) {
-      thisEpId = pathnameArr[pathnameArr.length - 1];
+      epId = pathnameArr[pathnameArr.length - 1];
+      epId = Number.parseInt(epId);
+
+      // seriesId = pathnameArr[pathnameArr.length - 2];
+      // seriesId = Number.parseInt(seriesId);
     } else {
-      alert("Please choose an episode first to have episode ID");
+      // alert("Please choose an episode first to have episode ID");
     }
 
-    if (thisEpId) {
-      generateSubtitle(thisEpId, title, null, true);
-      generateEpElement(thisEpId, title);
+    if (epId > 0) {
+      generateSubtitle({ ep_id: epId, ep_title: epTitle });
+      generateEpElement({ ep_id: epId, ep_title: epTitle });
     } else {
-      const classes = document.getElementsByClassName("panel-item__active");
-      if (classes.length > 0) {
-        const link = classes[0].firstChild;
-        if (link.href) {
-          const arr = link.href.split("/");
-          const epId = arr[arr.length - 1];
-          generateSubtitle(epId, title, null, true);
-          generateEpElement(epId, title);
-        }
+      const activeEp = document.body.querySelector(
+        ".video-play .ep-section .ep-list .ep-item--active"
+      );
+      const epUrlArr = activeEp?.href?.split("?")?.shift()?.split("/") || [];
+
+      // fallback epId
+      if (epUrlArr.length === 7) {
+        epId = epUrlArr[epUrlArr.length - 1];
+        epId = Number.parseInt(epId);
+
+        // seriesId = epUrlArr[epUrlArr.length - 2];
+        // seriesId = Number.parseInt(seriesId);
+      }
+
+      if (epId > 0) {
+        generateSubtitle({ ep_id: epId, ep_title: epTitle });
+        generateEpElement({ ep_id: epId, ep_title: epTitle });
+      } else {
+        alert("Can't identify episode ID, please contact dev");
       }
     }
   }
 
-  function resetContent() {
+  // Re-generate new links
+  function downloadThisEp() {
+    // Delete old links (subtitle, video, audio)
     document.getElementById(
       "jsonSubtitleList"
     ).innerHTML = `${APP_LANGUAGES[appLang].subtitle}\&nbsp;:\&nbsp;`;
@@ -557,15 +548,12 @@
     document.getElementById(
       "audioList"
     ).innerHTML = `${APP_LANGUAGES[appLang].audio}\&nbsp;:\&nbsp;`;
-  }
 
-  function downloadThisEp(e) {
-    // Reset
-    resetContent();
-
+    // Generate new links
     generateCurrentEpisodeElement();
   }
 
+  // Change subtitle language
   function changeLanguage(e) {
     localStorage.setItem("SUB_LANGUAGE", e.target.value);
     sub_language = e.target.value;
@@ -574,6 +562,7 @@
     downloadThisEp();
   }
 
+  // Change subtitle file format
   function changeSubFormat(e) {
     localStorage.setItem("SUB_FORMAT", e.target.value);
     sub_format = e.target.value;
@@ -582,6 +571,7 @@
     downloadThisEp();
   }
 
+  // Video quality change
   function changeQuality(e) {
     const values = e.target.value.split(";");
 
@@ -595,6 +585,62 @@
     downloadThisEp();
   }
 
+  // Get the title of the episode
+  function getEpTitle() {
+    const seriesTitle = getSeriesTitle();
+
+    const titleName = document.title
+      ?.replace(" - BiliBili", "")
+      ?.replace(`${seriesTitle} `, "");
+
+    const breadcrumbName = document.body.querySelector(
+      ".video-play__breadcrumb .breadcrumb__item:last-child > .breadcrumb__item-text"
+    )?.innerText;
+
+    const epTitle = breadcrumbName || titleName;
+
+    const epName = epTitle.split(" - ")[1];
+
+    let epNumber = epTitle.split(" - ")[0]?.split(" ")?.pop();
+    if (typeof epNumber === "string") {
+      epNumber = Number.parseInt(epNumber);
+    }
+
+    let customEpTitle;
+    if (epNumber > 0) {
+      customEpTitle = `${seriesTitle} - E${`${epNumber}`}${
+        epName ? ` - ${epName}` : ""
+      }`;
+    } else {
+      // PV ep
+      customEpTitle = `${seriesTitle} - ${epTitle}`;
+    }
+
+    return customEpTitle;
+  }
+
+  // Get the title of the series
+  function getSeriesTitle() {
+    const ogTitle = document.head
+      .querySelector("[property='og:title'][content]")
+      ?.content?.replace(" HD | bilibili", "");
+
+    const metaTitle = document.body.querySelector(
+      ".video-play .video-play__meta .bstar-meta .bstar-meta__title"
+    )?.innerText;
+
+    const metaOrginName = document.body.querySelector(
+      ".video-play .video-play__meta .bstar-meta .bstar-meta__extra .bstar-meta__origin-name .bstar-meta__origin-name-content"
+    )?.innerText;
+
+    const metaAliasName = document.body.querySelector(
+      ".video-play .video-play__meta .bstar-meta .bstar-meta__extra .bstar-meta__alias .bstar-meta__alias-content"
+    )?.innerText;
+
+    return ogTitle || metaTitle || metaAliasName || metaOrginName;
+  }
+
+  // Show Toast Message & automatically turn off after 3s
   let toastTimeout;
   function showToast(message) {
     const x = document.getElementById("snackbar");
