@@ -360,25 +360,34 @@
       }
 
       // Take data in response
-      let subtitleData = [];
-      if (sub_format === "ass") {
-        // ASS only
-        subtitleData = data.subtitles || [];
-      } else {
-        // SRT & others
-        subtitleData = data.video_subtitle || [];
+      const subtitleData = data.subtitles || data.video_subtitle || [];
+
+      // Select the subtitle that corresponds to the selected language
+      let matchedSubtitle;
+      for (let i = 0; i < subtitleData.length; i++) {
+        if (subtitleData[i]["lang_key"] === sub_language) {
+          if (!matchedSubtitle) {
+            const defaultUrl = data.subtitles[i].url;
+
+            const fallbackUrl =
+              data.video_subtitle[i]["srt"]?.url || defaultUrl;
+
+            matchedSubtitle = ["srt", "ass"].includes(sub_format)
+              ? data.video_subtitle[i][sub_format]?.url ||
+                defaultUrl ||
+                fallbackUrl
+              : fallbackUrl;
+          }
+        }
       }
 
-      // Get number in subtitle files in data
-      for (let i = 0; i < subtitleData.length; i++) {
-        if (subtitleData[i]["lang_key"] == sub_language) {
-          const ep_sub_url =
-            sub_format === "ass"
-              ? subtitleData[i].url
-              : subtitleData[i].srt.url;
-
-          processSubtitleArrayFromServer({ ep_title, ep_sub_url });
-        }
+      if (matchedSubtitle) {
+        processSubtitleArrayFromServer({
+          ep_title,
+          ep_sub_url: matchedSubtitle
+        });
+      } else {
+        alert("The language you selected, does not have subtitle files!");
       }
     }
   }
