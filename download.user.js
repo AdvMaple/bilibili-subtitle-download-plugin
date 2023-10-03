@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Bilibili international subtitle downloader
-// @version      0.7.2
+// @version      0.7.3
 // @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
@@ -335,7 +335,7 @@
         file_format = "srt";
 
         setNotice(
-          ".ass format subtitles are not available => The plugin will automatically create subtitle links in .srt format"
+          ".ass format subtitles are not available, the plugin will automatically create subtitle links in .srt format!"
         );
       }
 
@@ -401,7 +401,7 @@
           ep_sub_url: matchedSubtitle
         });
       } else {
-        alert("The language you selected, does not have subtitle files!");
+        setNotice("The language you selected, does not have subtitle files!");
       }
     }
   }

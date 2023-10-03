@@ -1,5 +1,14 @@
 # CHANGELOG
 
+> Datetime format: YYYY/MM/DD
+
+## 2023/10/03
+
+- Automatically create `.srt` subtitle file link if `.ass` subtitles are not available
+- Added warning message when `.ass` subtitles are not available and an alternative `.srt` subtitle file link has been created
+- Use a warning message instead of an alert when the selected language does not have subtitles
+- Updated changlog & readme
+
 ## 2023/10/02
 
 - Update the filename format similar to `yt-dlp` (https://github.com/yt-dlp/yt-dlp)
