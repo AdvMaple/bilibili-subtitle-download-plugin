@@ -692,9 +692,8 @@
 
     #downloadBiliintScript {
       position: fixed;
-      bottom: 6rem;
-      left: 1rem;
-      margin: 3px;
+      bottom: 2.2vw;
+      left: 2.2vw;
       z-index: 9999;
       opacity: 0.97;
       background: black;
@@ -766,13 +765,12 @@
     }
 
     .subtitleSelect {
+      margin-right: 8px;
+
       border-radius: 20px;
       padding: 8px;
       background: white;
       opacity: 0.97;
-    }
-    :not(.subtitleSelect:last-child) {
-      margin-right: 8px;
     }
 
     #plugin_notice {
@@ -781,6 +779,9 @@
       color: red;
       font-size: 13px;
       font-style: italic;
+    }
+    #plugin_notice:empty {
+      display: none;
     }
 
     #snackbar {
