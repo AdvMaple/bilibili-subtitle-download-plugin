@@ -4,6 +4,7 @@
 
 ## 2023/10/03
 
+- Fixed an issue where the new file name format did not work properly with different language interfaces
 - Automatically create `.srt` subtitle file link if `.ass` subtitles are not available
 - Added warning message when `.ass` subtitles are not available and an alternative `.srt` subtitle file link has been created
 - Use a warning message instead of an alert when the selected language does not have subtitles

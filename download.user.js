@@ -625,19 +625,20 @@
 
     const epTitle = breadcrumbName || titleName;
 
+    const epTitlePrefix = epTitle.split(" - ")[0];
     const epName = epTitle.split(" - ")[1];
 
-    let epNumber = epTitle.split(" - ")[0]?.split(" ")?.pop();
+    let epNumber = epTitlePrefix?.replace(/[^0-9]/g, "");
     if (typeof epNumber === "string") {
       epNumber = Number.parseInt(epNumber);
     }
 
     let customEpTitle;
-    if (epNumber > 0) {
+    if (epNumber >= 0) {
       customEpTitle = `E${`${epNumber}`}${epName ? ` - ${epName}` : ""}`;
     } else {
       // PV ep
-      customEpTitle = `${seriesTitle} - ${epTitle}`;
+      customEpTitle = `${epTitlePrefix || seriesTitle} - ${epName || epTitle}`;
     }
 
     return customEpTitle;
