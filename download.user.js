@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Bilibili international subtitle downloader
-// @version      0.7.2
+// @version      0.7.3
 // @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
 // @match        /\:\/\/.*.bili.*\/play\/.*$/
@@ -229,6 +229,8 @@
       APP_LANGUAGES[appLang].audio
     }\&nbsp;:\&nbsp;</div>
 
+    <div id="plugin_notice"></div>
+
     <div id="snackbar"></div>
   `;
 
@@ -267,13 +269,14 @@
     const rText = await r.text();
 
     let dataFormatName = "unknown format";
+    let file_format = sub_format;
     if (!isJsonString(rText)) {
       if (_isAssSubtitleFile(rText)) {
         dataFormatName = "ass";
 
         const blob = new Blob([rText], { type: "text/plain" });
 
-        createDownloadLink({ file_name: ep_title, blob });
+        createDownloadLink({ file_name: ep_title, blob, file_format });
       } else {
         alert("Server is returning wrong => contact dev :)");
       }
@@ -285,7 +288,11 @@
       let text = "";
 
       // Generate SRT and Web VTT format
-      if (sub_format === "vtt" || sub_format === "srt") {
+      if (
+        sub_format === "vtt" ||
+        sub_format === "srt" ||
+        sub_format === "ass"
+      ) {
         // Convert second to time stamp
         const _secToTimer = (sec) => {
           let o = new Date(0);
@@ -315,7 +322,7 @@
         });
 
         blob = new Blob([text], {
-          type: `text/${sub_format === "srt" ? "plain" : "vtt"}`
+          type: `text/${sub_format === "vtt" ? "vtt" : "plain"}`
         });
       } else {
         // Generate JSON format
@@ -324,20 +331,28 @@
         });
       }
 
+      if (sub_format === "ass") {
+        file_format = "srt";
+
+        setNotice(
+          ".ass format subtitles are not available, the plugin will automatically create subtitle links in .srt format!"
+        );
+      }
+
       // Create <a> tag
-      createDownloadLink({ file_name: ep_title, blob });
+      createDownloadLink({ file_name: ep_title, blob, file_format });
     }
 
     // if mismatch the setting and the download file => show toast
     showToast(
-      `The server is returning ${dataFormatName} file. The generated link is .${sub_format} file`
+      `The server is returning ${dataFormatName} file. The generated link is .${file_format} file`
     );
   };
 
   // Create download link for subtitles
-  function createDownloadLink({ file_name, blob }) {
+  function createDownloadLink({ file_name, blob, file_format = sub_format }) {
     const a = document.createElement("a");
-    a.download = `${file_name}.${sub_language}.${sub_format}`;
+    a.download = `${file_name}.${sub_language}.${file_format}`;
     a.textContent = `${file_name}`;
     a.href = URL.createObjectURL(blob);
 
@@ -386,7 +401,7 @@
           ep_sub_url: matchedSubtitle
         });
       } else {
-        alert("The language you selected, does not have subtitle files!");
+        setNotice("The language you selected, does not have subtitle files!");
       }
     }
   }
@@ -557,6 +572,9 @@
       "audioList"
     ).innerHTML = `${APP_LANGUAGES[appLang].audio}\&nbsp;:\&nbsp;`;
 
+    // Reset notice message
+    setNotice("");
+
     // Generate new links
     generateCurrentEpisodeElement();
   }
@@ -607,19 +625,20 @@
 
     const epTitle = breadcrumbName || titleName;
 
+    const epTitlePrefix = epTitle.split(" - ")[0];
     const epName = epTitle.split(" - ")[1];
 
-    let epNumber = epTitle.split(" - ")[0]?.split(" ")?.pop();
+    let epNumber = epTitlePrefix?.replace(/[^0-9]/g, "");
     if (typeof epNumber === "string") {
       epNumber = Number.parseInt(epNumber);
     }
 
     let customEpTitle;
-    if (epNumber > 0) {
+    if (epNumber >= 0) {
       customEpTitle = `E${`${epNumber}`}${epName ? ` - ${epName}` : ""}`;
     } else {
       // PV ep
-      customEpTitle = `${seriesTitle} - ${epTitle}`;
+      customEpTitle = `${epTitlePrefix || seriesTitle} - ${epName || epTitle}`;
     }
 
     return customEpTitle;
@@ -662,14 +681,19 @@
     }, 3000);
   }
 
+  function setNotice(message) {
+    const noticeEle = document.getElementById("plugin_notice");
+
+    noticeEle.innerText = message;
+  }
+
   // Style newly added button
   GM_addStyle(`
 
     #downloadBiliintScript {
       position: fixed;
-      bottom: 6rem;
-      left: 1rem;
-      margin: 3px;
+      bottom: 2.2vw;
+      left: 2.2vw;
       z-index: 9999;
       opacity: 0.97;
       background: black;
@@ -729,9 +753,9 @@
     }
 
     #downloadBiliintScript a {
-        color: #4c93ff;
-        background: white;
-        opacity: 0.97;
+      color: #4c93ff;
+      background: white;
+      opacity: 0.97;
     }
 
     #downloadBiliintScript a:hover {
@@ -741,13 +765,23 @@
     }
 
     .subtitleSelect {
+      margin-right: 8px;
+
       border-radius: 20px;
       padding: 8px;
       background: white;
       opacity: 0.97;
     }
-    :not(.subtitleSelect:last-child) {
-      margin-right: 8px;
+
+    #plugin_notice {
+      margin-top: 16px;
+
+      color: red;
+      font-size: 13px;
+      font-style: italic;
+    }
+    #plugin_notice:empty {
+      display: none;
     }
 
     #snackbar {
