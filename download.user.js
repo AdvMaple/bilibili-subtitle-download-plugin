@@ -560,13 +560,6 @@
     // Test video: https://www.bilibili.tv/en/video/4786384793243136
     const isVideo = location.pathname.includes("video");
 
-    if (pathnameArr.length === 5) {
-      thisEpId = pathnameArr[pathnameArr.length - 1];
-      seriesId = pathnameArr[pathnameArr.length - 2];
-    } else {
-      seriesId = pathnameArr[pathnameArr.length - 1];
-    }
-
     let epId, videoId, seasonId;
     if (isAnime) {
       if (pathnameArr.length === 5) {
@@ -585,9 +578,7 @@
       // Can't identify any ID
     }
 
-    const id = epId || videoId;
-
-    if (id > 0) {
+    if (epId > 0 || videoId > 0) {
       // ok
     } else {
       // Fallback for anime
