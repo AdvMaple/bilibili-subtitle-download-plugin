@@ -2,6 +2,13 @@
 
 > Datetime format: YYYY/MM/DD
 
+## 2023/12/22
+
+- Supported video format on bilibili
+- Changed the content of the error notification more clearly
+- Refactoring the function to get video/episode/season ID
+- Refactoring the function to get video quality list
+
 ## 2023/10/03
 
 - Fixed an issue where the new file name format did not work properly with different language interfaces
