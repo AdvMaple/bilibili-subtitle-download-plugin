@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Bilibili international subtitle downloader
-// @version      0.7.3
+// @version      0.7.4
 // @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
-// @match        /\:\/\/.*.bili.*\/play\/.*$/
-// @include      /\:\/\/.*.bili.*\/play\/.*$/
+// @match        /\:\/\/.*.bili.*\/(play|video)\/.*$/
+// @include      /\:\/\/.*.bili.*\/(play|video)\/.*$/
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
 // @updateURL    https://github.com/AdvMaple/bilibili-subtitle-download-plugin/raw/feature/download.user.js
 // @grant        GM_addStyle
@@ -118,18 +118,18 @@
     selectedCodec = DEFAULT_USER_OPTIONS.video_codec;
   }
 
+  // Set APP language
   const pathnameArr = location.pathname.split("/");
   let appLang = pathnameArr[1];
   if (!Object.keys(APP_LANGUAGES).includes(appLang)) {
     appLang = "en";
   }
 
-  let thisEpId, seriesId;
-  if (pathnameArr.length === 5) {
-    thisEpId = pathnameArr[pathnameArr.length - 1];
-    seriesId = pathnameArr[pathnameArr.length - 2];
-  } else {
-    seriesId = pathnameArr[pathnameArr.length - 1];
+  // Generate video quality list
+  const { ep_id, video_id, season_id } = getIds();
+  if (ep_id > 0 || season_id > 0 || video_id > 0) {
+    // Generate by: ep_id ~> season_id ~> video_id
+    generateQualities({ ep_id, season_id, video_id });
   }
 
   function createSubLanguageOptions() {
@@ -199,11 +199,9 @@
 
   let zNode = document.createElement("div");
   zNode.innerHTML = `
-    <div id="gen-sigle">
-      <button id="down-this" class="btn" type="button"> ${
-        APP_LANGUAGES[appLang].gen_this_link
-      } </button>
-    </div>
+    <button id="down-this" class="btn" type="button"> ${
+      APP_LANGUAGES[appLang].gen_this_link
+    } </button>
 
     <select id="changeLanguage" class="subtitleSelect" name="lang">
       ${createSubLanguageOptions()}
@@ -278,7 +276,7 @@
 
         createDownloadLink({ file_name: ep_title, blob, file_format });
       } else {
-        alert("Server is returning wrong => contact dev :)");
+        alert("Format subtitles .ass problematic, please contact DEV");
       }
     } else {
       dataFormatName = "json";
@@ -359,18 +357,24 @@
     document.getElementById("jsonSubtitleList").appendChild(a);
   }
 
-  async function generateSubtitle({ ep_id, ep_title }) {
-    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=vi_VN&platform=web&episode_id=${ep_id}&spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all`;
+  async function generateSubtitle({ ep_id, video_id, ep_title }) {
+    const isAnime = ep_id > 0;
+    const idParam = isAnime ? `episode_id=${ep_id}` : `aid=${video_id}`;
+
+    // Anime: &spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all
+    // Video: &spm_id=bstar-web.ugc-video-detail.0.0&from_spm_id=
+    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=vi_VN&platform=web&${idParam}`;
 
     const r = await fetch(FETCH_URL, { credentials: "include" });
     const rText = await r.text();
 
     if (!isJsonString(rText)) {
-      alert("Server is returning wrong => contact dev :)");
+      alert("Can't get subtitles data, please contact DEV");
     } else {
       const { data } = JSON.parse(rText);
+
       if (data.subtitles === null || data.video_subtitle === null) {
-        alert("There has been some problems, please contact dev");
+        alert("There is no suitable subtitle data");
       }
 
       // Take data in response
@@ -406,50 +410,56 @@
     }
   }
 
-  function generateQualities(epId) {
+  function generateQualities({ ep_id, season_id, video_id }) {
+    const isVideo = video_id > 0;
+    const isAnime = ep_id > 0;
+    const isAnimeSeries = season_id > 0;
+
+    const idParam =
+      isAnime || isAnimeSeries
+        ? isAnime
+          ? `ep_id=${ep_id}`
+          : `season_id=${season_id}`
+        : `aid=${video_id}`;
+
     fetch(
-      `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${epId}&device=wap&platform=web&qn=64&tf=0&type=0`,
+      `https://api.bilibili.tv/intl/gateway/web/playurl?${idParam}&platform=web&device=wap&qn=64&tf=0&type=0`,
       { credentials: "include" }
     )
       .then((r) => r.json())
       .then(({ data }) => {
-        const d = data.playurl;
-        const qualities = d.video
-          .filter((item) => !!item.video_resource.url)
-          .map((item) => ({
-            codec_id: item.video_resource.codec_id,
-            id: item.video_resource.quality,
-            label: item.stream_info.desc_words
-          }));
+        if (isAnime || isVideo) {
+          const d = data.playurl;
+          const qualities = d.video
+            .filter((item) => !!item.video_resource.url)
+            .map((item) => ({
+              codec_id: item.video_resource.codec_id,
+              id: item.video_resource.quality,
+              label: item.stream_info.desc_words
+            }));
 
-        const options = createQualityOptions(qualities);
-        document.getElementById("changeQuality").innerHTML = options;
-      });
-  }
-
-  if (!thisEpId) {
-    fetch(
-      `https://api.bilibili.tv/intl/gateway/web/v2/ogv/play/episodes?platform=web&season_id=${seriesId}`,
-      { credentials: "include" }
-    )
-      .then((r) => r.json())
-      .then(({ data }) => {
-        if (data?.sections?.length > 0) {
-          const eps = data?.sections[0].episodes;
-          if (eps.length > 0) {
-            const epId = eps[0].episode_id;
-            generateQualities(epId);
+          const options = createQualityOptions(qualities);
+          document.getElementById("changeQuality").innerHTML = options;
+        } else {
+          // anime series
+          if (data?.sections?.length > 0) {
+            const eps = data?.sections[0].episodes;
+            if (eps.length > 0) {
+              const epId = eps[0].episode_id;
+              generateQualities(epId);
+            }
           }
         }
       });
-  } else {
-    generateQualities(thisEpId);
   }
 
   // Generate video & audio url of ep
-  function generateEpElement({ ep_id, ep_title }) {
+  function generateEpElement({ ep_id, video_id, ep_title }) {
+    const isAnime = ep_id > 0;
+    const idParam = isAnime ? `ep_id=${ep_id}` : `aid=${video_id}`;
+
     fetch(
-      `https://api.bilibili.tv/intl/gateway/web/playurl?ep_id=${ep_id}&device=wap&platform=web&qn=64&tf=0&type=0`,
+      `https://api.bilibili.tv/intl/gateway/web/playurl?${idParam}&device=wap&platform=web&qn=64&tf=0&type=0`,
       { credentials: "include" }
     )
       .then((r) => r.json())
@@ -519,44 +529,82 @@
 
   function generateCurrentEpisodeElement() {
     const epTitle = getEpTitle();
-    let epId, seriesId;
+    const { ep_id, video_id } = getIds();
 
+    if (ep_id > 0 || video_id > 0) {
+      generateSubtitle({
+        ep_id,
+        video_id,
+        ep_title: `${epTitle} [${ep_id || video_id}]`
+      });
+
+      generateEpElement({
+        ep_id,
+        video_id,
+        ep_title: `${epTitle} [${ep_id || video_id}]`
+      });
+    } else {
+      // Something wrong with `getIds()`
+    }
+  }
+
+  // Gets: ep_id | video_id | season_id
+  function getIds() {
     const pathnameArr = location.pathname.split("/");
-    if (pathnameArr.length === 5) {
-      epId = pathnameArr[pathnameArr.length - 1];
-      epId = Number.parseInt(epId);
 
-      // seriesId = pathnameArr[pathnameArr.length - 2];
-      // seriesId = Number.parseInt(seriesId);
-    } else {
-      // alert("Please choose an episode first to have episode ID");
-    }
+    // Test anime episode: https://www.bilibili.tv/en/play/34580/340313
+    // Test anime series: https://www.bilibili.tv/en/play/34580
+    // Test anime movie: https://www.bilibili.tv/en/play/1005426
+    const isAnime = location.pathname.includes("play");
 
-    if (epId > 0) {
-      generateSubtitle({ ep_id: epId, ep_title: `${epTitle} [${epId}]` });
-      generateEpElement({ ep_id: epId, ep_title: `${epTitle} [${epId}]` });
-    } else {
-      const activeEp = document.body.querySelector(
-        ".video-play .ep-section .ep-list .ep-item--active"
-      );
-      const epUrlArr = activeEp?.href?.split("?")?.shift()?.split("/") || [];
+    // Test video: https://www.bilibili.tv/en/video/4786384793243136
+    const isVideo = location.pathname.includes("video");
 
-      // fallback epId
-      if (epUrlArr.length === 7) {
-        epId = epUrlArr[epUrlArr.length - 1];
-        epId = Number.parseInt(epId);
-
-        // seriesId = epUrlArr[epUrlArr.length - 2];
-        // seriesId = Number.parseInt(seriesId);
-      }
-
-      if (epId > 0) {
-        generateSubtitle({ ep_id: epId, ep_title: `${epTitle} [${epId}]` });
-        generateEpElement({ ep_id: epId, ep_title: `${epTitle} [${epId}]` });
+    let epId, videoId, seasonId;
+    if (isAnime) {
+      if (pathnameArr.length === 5) {
+        epId = pathnameArr[pathnameArr.length - 1];
+        seasonId = pathnameArr[pathnameArr.length - 2];
       } else {
-        alert("Can't identify episode ID, please contact dev");
+        seasonId = pathnameArr[pathnameArr.length - 1];
+      }
+
+      epId = Number.parseInt(epId);
+      seasonId = Number.parseInt(seasonId);
+    } else if (isVideo) {
+      videoId = pathnameArr[pathnameArr.length - 1];
+      videoId = Number.parseInt(videoId);
+    } else {
+      // Can't identify any ID
+    }
+
+    if (epId > 0 || videoId > 0) {
+      // ok
+    } else {
+      // Fallback for anime
+      if (isAnime) {
+        const activeEp = document.body.querySelector(
+          ".video-play .ep-section .ep-list .ep-item--active"
+        );
+        const epUrlArr = activeEp?.href?.split("?")?.shift()?.split("/") || [];
+
+        // fallback epId
+        if (epUrlArr.length === 7) {
+          epId = epUrlArr[epUrlArr.length - 1];
+          epId = Number.parseInt(epId);
+        }
+
+        if (epId > 0) {
+          // ok
+        } else {
+          alert("Can't identify episode ID, please contact dev");
+        }
+      } else {
+        alert("Can't identify video ID, please contact dev");
       }
     }
+
+    return { ep_id: epId, video_id: videoId, season_id: seasonId };
   }
 
   // Re-generate new links
