@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Bilibili international subtitle downloader
-// @version      0.7.4
+// @version      0.7.5
 // @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
-// @match        /\:\/\/.*.bili.*\/(play|video)\/.*$/
-// @include      /\:\/\/.*.bili.*\/(play|video)\/.*$/
+// @match        /\:\/\/.*.bilibili.*\/(\w\/|)(play|video)\/.*$/
+// @include      /\:\/\/.*.bilibili.*\/(\w\/|)(play|video)\/.*$/
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
 // @updateURL    https://github.com/AdvMaple/bilibili-subtitle-download-plugin/raw/feature/download.user.js
 // @grant        GM_addStyle
@@ -21,12 +21,13 @@
   };
 
   const SUB_LANGUAGES = [
-    { id: "vi", label: "Tiếng Việt" },
     { id: "en", label: "English" },
     { id: "th", label: "ภาษาไทย" },
+    { id: "vi", label: "Tiếng Việt" },
     { id: "id", label: "Bahasa Indonesia" },
     { id: "ms", label: "Bahasa Melayu" },
-    { id: "zh-Hans", label: "中文（简体）" }
+    { id: "zh-Hans", label: "中文（简体）" },
+    { id: "zh-Hant", label: "中文（繁体）" }
   ];
 
   const SUB_FORMATS = ["ass", "srt", "vtt", "json"];
@@ -363,7 +364,7 @@
 
     // Anime: &spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all
     // Video: &spm_id=bstar-web.ugc-video-detail.0.0&from_spm_id=
-    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=vi_VN&platform=web&${idParam}`;
+    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=${sub_language}&platform=web&${idParam}`;
 
     const r = await fetch(FETCH_URL, { credentials: "include" });
     const rText = await r.text();
@@ -550,30 +551,44 @@
 
   // Gets: ep_id | video_id | season_id
   function getIds() {
+    const ANIME_URL_IDENTIFY = "play";
+    const VIDEO_URL_IDENTIFY = "video";
+
+    const _getUrlIdentifyIndex = (urlArr = [], urlIdentify = "") => {
+      if (urlArr.length > 0) {
+        return urlArr.findIndex((item) => item === urlIdentify);
+      }
+
+      return;
+    };
+
     const pathnameArr = location.pathname.split("/");
 
     // Test anime episode: https://www.bilibili.tv/en/play/34580/340313
     // Test anime series: https://www.bilibili.tv/en/play/34580
-    // Test anime movie: https://www.bilibili.tv/en/play/1005426
-    const isAnime = location.pathname.includes("play");
+    // Test anime series (without nation code): https://www.bilibili.tv/play/2097863
+    // Test anime movie: https://www.bilibili.tv/play/1067286
+    const isAnime = location.pathname.includes(ANIME_URL_IDENTIFY);
 
     // Test video: https://www.bilibili.tv/en/video/4786384793243136
-    const isVideo = location.pathname.includes("video");
+    const isVideo = location.pathname.includes(VIDEO_URL_IDENTIFY);
+
+    const identifyIndex = _getUrlIdentifyIndex(
+      pathnameArr,
+      isAnime ? ANIME_URL_IDENTIFY : VIDEO_URL_IDENTIFY
+    );
 
     let epId, videoId, seasonId;
     if (isAnime) {
-      if (pathnameArr.length === 5) {
-        epId = pathnameArr[pathnameArr.length - 1];
-        seasonId = pathnameArr[pathnameArr.length - 2];
-      } else {
-        seasonId = pathnameArr[pathnameArr.length - 1];
-      }
+      epId = pathnameArr[identifyIndex + 2];
+      seasonId = pathnameArr[identifyIndex + 1];
 
-      epId = Number.parseInt(epId);
-      seasonId = Number.parseInt(seasonId);
+      epId = Number.parseInt(epId) || undefined;
+      seasonId = Number.parseInt(seasonId) || undefined;
     } else if (isVideo) {
-      videoId = pathnameArr[pathnameArr.length - 1];
-      videoId = Number.parseInt(videoId);
+      videoId = pathnameArr[identifyIndex + 1];
+
+      videoId = Number.parseInt(videoId) || undefined;
     } else {
       // Can't identify any ID
     }
@@ -589,9 +604,14 @@
         const epUrlArr = activeEp?.href?.split("?")?.shift()?.split("/") || [];
 
         // fallback epId
-        if (epUrlArr.length === 7) {
-          epId = epUrlArr[epUrlArr.length - 1];
-          epId = Number.parseInt(epId);
+        if (epUrlArr && epUrlArr.length > 0) {
+          const activeEpIdentifyIndex = _getUrlIdentifyIndex(
+            epUrlArr,
+            ANIME_URL_IDENTIFY
+          );
+
+          epId = epUrlArr[activeEpIdentifyIndex + 2];
+          epId = Number.parseInt(epId) || undefined;
         }
 
         if (epId > 0) {

@@ -2,9 +2,16 @@
 
 > Datetime format: YYYY/MM/DD
 
+## 2024/03/18
+
+- Supported Traditional Chinese language
+- Supported `video` with nation code
+- Supported `anime` without nation code
+- Get the subtitle file based on the language you are selecting for the API
+
 ## 2023/12/22
 
-- Supported video format on bilibili
+- Supported `video` on bilibili
 - Changed the content of the error notification more clearly
 - Refactoring the function to get video/episode/season ID
 - Refactoring the function to get video quality list
