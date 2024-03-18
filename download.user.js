@@ -617,7 +617,7 @@
         if (epId > 0) {
           // ok
         } else {
-          // alert("Can't identify episode ID, please contact dev");
+          alert("Can't identify episode ID, please contact dev");
         }
       } else {
         alert("Can't identify video ID, please contact dev");
