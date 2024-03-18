@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Bilibili international subtitle downloader
-// @version      0.7.4
+// @version      0.7.5
 // @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
 // @match        /\:\/\/.*.bilibili.*\/(\w\/|)(play|video)\/.*$/
