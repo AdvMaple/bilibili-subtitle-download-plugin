@@ -3,8 +3,8 @@
 // @version      0.7.4
 // @description  Download subtitle from bilibili.tv
 // @author       AdvMaple
-// @match        /\:\/\/.*.bili.*\/(play|video)\/.*$/
-// @include      /\:\/\/.*.bili.*\/(play|video)\/.*$/
+// @match        /\:\/\/.*.bilibili.*\/(\w\/|)(play|video)\/.*$/
+// @include      /\:\/\/.*.bilibili.*\/(\w\/|)(play|video)\/.*$/
 // @icon         https://www.google.com/s2/favicons?domain=biliintl.com
 // @updateURL    https://github.com/AdvMaple/bilibili-subtitle-download-plugin/raw/feature/download.user.js
 // @grant        GM_addStyle
@@ -551,30 +551,44 @@
 
   // Gets: ep_id | video_id | season_id
   function getIds() {
+    const ANIME_URL_IDENTIFY = "play";
+    const VIDEO_URL_IDENTIFY = "video";
+
+    const _getUrlIdentifyIndex = (urlArr = [], urlIdentify = "") => {
+      if (urlArr.length > 0) {
+        return urlArr.findIndex((item) => item === urlIdentify);
+      }
+
+      return;
+    };
+
     const pathnameArr = location.pathname.split("/");
 
     // Test anime episode: https://www.bilibili.tv/en/play/34580/340313
     // Test anime series: https://www.bilibili.tv/en/play/34580
-    // Test anime movie: https://www.bilibili.tv/en/play/1005426
-    const isAnime = location.pathname.includes("play");
+    // Test anime series (without nation code): https://www.bilibili.tv/play/2097863
+    // Test anime movie: https://www.bilibili.tv/play/1067286
+    const isAnime = location.pathname.includes(ANIME_URL_IDENTIFY);
 
     // Test video: https://www.bilibili.tv/en/video/4786384793243136
-    const isVideo = location.pathname.includes("video");
+    const isVideo = location.pathname.includes(VIDEO_URL_IDENTIFY);
+
+    const identifyIndex = _getUrlIdentifyIndex(
+      pathnameArr,
+      isAnime ? ANIME_URL_IDENTIFY : VIDEO_URL_IDENTIFY
+    );
 
     let epId, videoId, seasonId;
     if (isAnime) {
-      if (pathnameArr.length === 5) {
-        epId = pathnameArr[pathnameArr.length - 1];
-        seasonId = pathnameArr[pathnameArr.length - 2];
-      } else {
-        seasonId = pathnameArr[pathnameArr.length - 1];
-      }
+      epId = pathnameArr[identifyIndex + 2];
+      seasonId = pathnameArr[identifyIndex + 1];
 
-      epId = Number.parseInt(epId);
-      seasonId = Number.parseInt(seasonId);
+      epId = Number.parseInt(epId) || undefined;
+      seasonId = Number.parseInt(seasonId) || undefined;
     } else if (isVideo) {
-      videoId = pathnameArr[pathnameArr.length - 1];
-      videoId = Number.parseInt(videoId);
+      videoId = pathnameArr[identifyIndex + 1];
+
+      videoId = Number.parseInt(videoId) || undefined;
     } else {
       // Can't identify any ID
     }
@@ -590,15 +604,20 @@
         const epUrlArr = activeEp?.href?.split("?")?.shift()?.split("/") || [];
 
         // fallback epId
-        if (epUrlArr.length === 7) {
-          epId = epUrlArr[epUrlArr.length - 1];
-          epId = Number.parseInt(epId);
+        if (epUrlArr && epUrlArr.length > 0) {
+          const activeEpIdentifyIndex = _getUrlIdentifyIndex(
+            epUrlArr,
+            ANIME_URL_IDENTIFY
+          );
+
+          epId = epUrlArr[activeEpIdentifyIndex + 2];
+          epId = Number.parseInt(epId) || undefined;
         }
 
         if (epId > 0) {
           // ok
         } else {
-          alert("Can't identify episode ID, please contact dev");
+          // alert("Can't identify episode ID, please contact dev");
         }
       } else {
         alert("Can't identify video ID, please contact dev");
