@@ -5,6 +5,7 @@
 ## 2024/03/18
 
 - Supported Traditional Chinese language
+- Get the subtitle file based on the language you are selecting for the API
 
 ## 2023/12/22
 

@@ -364,7 +364,7 @@
 
     // Anime: &spm_id=bstar-web.pgc-video-detail.0.0&from_spm_id=bstar-web.homepage.top-list.all
     // Video: &spm_id=bstar-web.ugc-video-detail.0.0&from_spm_id=
-    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=vi_VN&platform=web&${idParam}`;
+    const FETCH_URL = `https://api.bilibili.tv/intl/gateway/web/v2/subtitle?s_locale=${sub_language}&platform=web&${idParam}`;
 
     const r = await fetch(FETCH_URL, { credentials: "include" });
     const rText = await r.text();
