@@ -21,12 +21,13 @@
   };
 
   const SUB_LANGUAGES = [
-    { id: "vi", label: "Tiếng Việt" },
     { id: "en", label: "English" },
     { id: "th", label: "ภาษาไทย" },
+    { id: "vi", label: "Tiếng Việt" },
     { id: "id", label: "Bahasa Indonesia" },
     { id: "ms", label: "Bahasa Melayu" },
-    { id: "zh-Hans", label: "中文（简体）" }
+    { id: "zh-Hans", label: "中文（简体）" },
+    { id: "zh-Hant", label: "中文（繁体）" }
   ];
 
   const SUB_FORMATS = ["ass", "srt", "vtt", "json"];

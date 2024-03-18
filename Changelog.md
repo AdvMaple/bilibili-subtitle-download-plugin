@@ -2,6 +2,10 @@
 
 > Datetime format: YYYY/MM/DD
 
+## 2024/03/18
+
+- Supported Traditional Chinese language
+
 ## 2023/12/22
 
 - Supported video format on bilibili
